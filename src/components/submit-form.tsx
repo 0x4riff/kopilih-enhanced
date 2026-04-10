@@ -1,153 +1,396 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
-const initialForm = {
+import { useDemoStore } from "@/components/demo-store-provider";
+import { amenityOptions } from "@/lib/data";
+import type {
+  Amenity,
+  CoffeeSubmission,
+  PriceRange,
+  SubmissionInput,
+} from "@/lib/types";
+import { formatStatusLabel } from "@/lib/utils";
+
+const initialFormState = {
   name: "",
   city: "",
+  neighborhood: "",
   address: "",
   description: "",
-  priceRange: "$$",
-  vibes: "",
-  amenities: "WiFi cepat, Colokan banyak",
+  priceRange: "$$" as PriceRange,
+  vibes: "Work-friendly, Cozy",
+  amenities: ["WiFi cepat", "Indoor AC"] as Amenity[],
   imageUrl: "",
   mapsUrl: "",
   instagramUrl: "",
 };
 
+function TextField({
+  hint,
+  label,
+  onChange,
+  value,
+}: {
+  hint?: string;
+  label: string;
+  onChange: (value: string) => void;
+  value: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {label}{" "}
+        {hint ? (
+          <span className="normal-case tracking-normal text-slate-400">
+            {hint}
+          </span>
+        ) : null}
+      </span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400"
+      />
+    </label>
+  );
+}
+
+function TextAreaField({
+  label,
+  onChange,
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  value: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {label}
+      </span>
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        rows={5}
+        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400"
+      />
+    </label>
+  );
+}
+
+function SelectField({
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  options: string[];
+  value: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function InfoCard({
+  body,
+  eyebrow,
+  title,
+}: {
+  body: string;
+  eyebrow: string;
+  title: string;
+}) {
+  return (
+    <section className="rounded-[30px] border border-white/70 bg-white/80 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {eyebrow}
+      </p>
+      <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">
+        {title}
+      </h2>
+      <p className="mt-4 text-sm leading-6 text-slate-500">{body}</p>
+    </section>
+  );
+}
+
 export function SubmitForm() {
-  const [form, setForm] = useState(initialForm);
-  const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [message, setMessage] = useState("");
+  const { submitCafe } = useDemoStore();
+  const [form, setForm] = useState(initialFormState);
+  const [error, setError] = useState("");
+  const [submitted, setSubmitted] = useState<CoffeeSubmission | null>(null);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setState("loading");
-    setMessage("");
 
-    try {
-      const response = await fetch("/api/submissions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          vibes: form.vibes.split(",").map((item) => item.trim()).filter(Boolean),
-          amenities: form.amenities.split(",").map((item) => item.trim()).filter(Boolean),
-        }),
-      });
+    const vibes = form.vibes
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
 
-      if (!response.ok) {
-        throw new Error("Submit gagal");
-      }
-
-      const payload = await response.json();
-      setState("success");
-      setMessage(`Submission terkirim dengan status ${payload.submission.status}. Cek area admin untuk approve/reject demo.`);
-      setForm(initialForm);
-    } catch {
-      setState("error");
-      setMessage("Gagal mengirim submission. Coba lagi.");
+    if (
+      !form.name.trim() ||
+      !form.city.trim() ||
+      !form.neighborhood.trim() ||
+      !form.address.trim() ||
+      !form.description.trim()
+    ) {
+      setError("Please fill the core cafe details before submitting.");
+      return;
     }
-  }
 
-  const fields = [
-    { key: "name", label: "Nama cafe", type: "text", placeholder: "Mis. Kopi Tengah Kota" },
-    { key: "city", label: "Kota", type: "text", placeholder: "Jakarta" },
-    { key: "address", label: "Alamat", type: "text", placeholder: "Jl. ..." },
-    { key: "imageUrl", label: "Image URL", type: "url", placeholder: "https://..." },
-    { key: "mapsUrl", label: "Google Maps URL", type: "url", placeholder: "https://maps.google.com/..." },
-    { key: "instagramUrl", label: "Instagram URL", type: "url", placeholder: "https://instagram.com/..." },
-  ] as const;
+    if (vibes.length === 0) {
+      setError("Add at least one vibe, separated by commas.");
+      return;
+    }
+
+    if (form.amenities.length === 0) {
+      setError("Select at least one amenity.");
+      return;
+    }
+
+    setError("");
+
+    const payload: SubmissionInput = {
+      name: form.name.trim(),
+      city: form.city.trim(),
+      neighborhood: form.neighborhood.trim(),
+      address: form.address.trim(),
+      description: form.description.trim(),
+      priceRange: form.priceRange,
+      vibes,
+      amenities: form.amenities,
+      imageUrl: form.imageUrl.trim(),
+      mapsUrl: form.mapsUrl.trim(),
+      instagramUrl: form.instagramUrl.trim(),
+    };
+
+    const next = submitCafe(payload);
+    setSubmitted(next);
+    setForm(initialFormState);
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 rounded-[32px] border border-white/60 bg-white p-6 shadow-xl sm:p-8">
-      <div className="grid gap-4 sm:grid-cols-2">
-        {fields.map((field) => (
-          <label key={field.key} className="space-y-2 text-sm font-medium text-slate-700">
-            {field.label}
-            <input
-              required={field.key !== "instagramUrl"}
-              type={field.type}
-              value={form[field.key]}
-              onChange={(event) => setForm((current) => ({ ...current, [field.key]: event.target.value }))}
-              placeholder={field.placeholder}
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-300"
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="rounded-[34px] border border-white/70 bg-white/80 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+            User submission
+          </p>
+          <h1 className="mt-3 font-display text-5xl leading-none text-slate-950">
+            Propose a new cafe for the public listing.
+          </h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-500">
+            Submissions land as pending entries in localStorage. They only
+            appear on the homepage after approval in the demo admin page.
+          </p>
+
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <TextField
+                label="Cafe name"
+                value={form.name}
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, name: value }))
+                }
+              />
+              <TextField
+                label="City"
+                value={form.city}
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, city: value }))
+                }
+              />
+              <TextField
+                label="Neighborhood"
+                value={form.neighborhood}
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, neighborhood: value }))
+                }
+              />
+              <SelectField
+                label="Price range"
+                value={form.priceRange}
+                onChange={(value) =>
+                  setForm((current) => ({
+                    ...current,
+                    priceRange: value as PriceRange,
+                  }))
+                }
+                options={["$", "$$", "$$$"]}
+              />
+            </div>
+
+            <TextField
+              label="Street address"
+              value={form.address}
+              onChange={(value) =>
+                setForm((current) => ({ ...current, address: value }))
+              }
             />
-          </label>
-        ))}
-      </div>
 
-      <div className="grid gap-4 sm:grid-cols-[0.7fr_1.3fr]">
-        <label className="space-y-2 text-sm font-medium text-slate-700">
-          Price range
-          <select
-            value={form.priceRange}
-            onChange={(event) => setForm((current) => ({ ...current, priceRange: event.target.value }))}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-300"
-          >
-            <option value="$">$</option>
-            <option value="$$">$$</option>
-            <option value="$$$">$$$</option>
-          </select>
-        </label>
+            <TextAreaField
+              label="Short description"
+              value={form.description}
+              onChange={(value) =>
+                setForm((current) => ({ ...current, description: value }))
+              }
+            />
 
-        <label className="space-y-2 text-sm font-medium text-slate-700">
-          Vibe tags
-          <input
-            required
-            type="text"
-            value={form.vibes}
-            onChange={(event) => setForm((current) => ({ ...current, vibes: event.target.value }))}
-            placeholder="work-friendly, minimal, brunch"
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-300"
+            <TextField
+              label="Vibes"
+              hint="Separate with commas"
+              value={form.vibes}
+              onChange={(value) =>
+                setForm((current) => ({ ...current, vibes: value }))
+              }
+            />
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Amenities
+              </p>
+              <div className="mt-3 flex flex-wrap gap-3">
+                {amenityOptions.map((amenity) => {
+                  const active = form.amenities.includes(amenity);
+
+                  return (
+                    <button
+                      key={amenity}
+                      type="button"
+                      onClick={() =>
+                        setForm((current) => ({
+                          ...current,
+                          amenities: active
+                            ? current.amenities.filter((item) => item !== amenity)
+                            : [...current.amenities, amenity],
+                        }))
+                      }
+                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                        active
+                          ? "border-amber-500 bg-amber-500 text-white"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-amber-300"
+                      }`}
+                    >
+                      {amenity}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <TextField
+                label="Image URL"
+                hint="Optional"
+                value={form.imageUrl}
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, imageUrl: value }))
+                }
+              />
+              <TextField
+                label="Google Maps URL"
+                hint="Optional"
+                value={form.mapsUrl}
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, mapsUrl: value }))
+                }
+              />
+              <TextField
+                label="Instagram URL"
+                hint="Optional"
+                value={form.instagramUrl}
+                onChange={(value) =>
+                  setForm((current) => ({ ...current, instagramUrl: value }))
+                }
+              />
+            </div>
+
+            {error ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {error}
+              </div>
+            ) : null}
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="submit"
+                className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Submit to demo queue
+              </button>
+              <Link
+                href="/admin/submissions"
+                className="rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Open admin queue
+              </Link>
+            </div>
+          </form>
+        </section>
+
+        <aside className="space-y-5">
+          <InfoCard
+            eyebrow="Flow"
+            title="What happens next?"
+            body="The form writes a pending submission into localStorage for this browser. The homepage will not show it until you approve it in Admin."
           />
-        </label>
+          <InfoCard
+            eyebrow="Why local-first"
+            title="Safe to deploy"
+            body="There is no writable server filesystem or shared database in this demo. That keeps the build and deployment Vercel-safe without fake persistence."
+          />
+
+          {submitted ? (
+            <section className="rounded-[30px] border border-emerald-100 bg-emerald-50 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                Submission created
+              </p>
+              <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">
+                {submitted.name}
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-slate-600">
+                Status: {formatStatusLabel(submitted.status)}. Use the admin
+                page to approve or reject it.
+              </p>
+              <div className="mt-5 flex gap-3">
+                <Link
+                  href="/admin/submissions"
+                  className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white"
+                >
+                  Review in admin
+                </Link>
+                <Link
+                  href="/"
+                  className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+                >
+                  Back home
+                </Link>
+              </div>
+            </section>
+          ) : null}
+        </aside>
       </div>
-
-      <label className="space-y-2 text-sm font-medium text-slate-700">
-        Fasilitas
-        <input
-          required
-          type="text"
-          value={form.amenities}
-          onChange={(event) => setForm((current) => ({ ...current, amenities: event.target.value }))}
-          placeholder="WiFi cepat, Colokan banyak, Outdoor"
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-300"
-        />
-      </label>
-
-      <label className="space-y-2 text-sm font-medium text-slate-700">
-        Deskripsi singkat
-        <textarea
-          required
-          value={form.description}
-          onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
-          placeholder="Kenapa cafe ini layak masuk Kopilih?"
-          rows={5}
-          className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none focus:border-orange-300"
-        />
-      </label>
-
-      <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-500">Submission disimpan di demo local-first store dan butuh approval admin sebelum tampil publik.</p>
-        <button
-          type="submit"
-          disabled={state === "loading"}
-          className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
-        >
-          {state === "loading" ? "Mengirim..." : "Submit coffee shop"}
-        </button>
-      </div>
-
-      {message ? (
-        <div
-          className={`rounded-2xl px-4 py-3 text-sm ${
-            state === "success" ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
-          }`}
-        >
-          {message}
-        </div>
-      ) : null}
-    </form>
+    </div>
   );
 }

@@ -11,6 +11,8 @@ export type Amenity =
   | "Brunch"
   | "Roastery";
 
+export type ShopSource = "editorial" | "community";
+
 export type CoffeeShop = {
   id: string;
   slug: string;
@@ -31,7 +33,7 @@ export type CoffeeShop = {
   hours: { day: string; open: string }[];
   featured?: boolean;
   wifiFriendly: boolean;
-  source?: string;
+  source: ShopSource;
 };
 
 export type SubmissionStatus = "pending" | "approved" | "rejected";
@@ -41,12 +43,12 @@ export type CoffeeSubmission = {
   slug: string;
   name: string;
   city: string;
-  neighborhood?: string;
+  neighborhood: string;
   address: string;
   description: string;
   priceRange: PriceRange;
   vibes: string[];
-  amenities: string[];
+  amenities: Amenity[];
   imageUrl: string;
   mapsUrl: string;
   instagramUrl: string;
@@ -54,6 +56,11 @@ export type CoffeeSubmission = {
   status: SubmissionStatus;
   adminNote?: string;
 };
+
+export type SubmissionInput = Omit<
+  CoffeeSubmission,
+  "id" | "slug" | "submittedAt" | "status" | "adminNote"
+>;
 
 export type ShopSort = "featured" | "rating" | "price-low" | "name";
 
@@ -64,4 +71,10 @@ export type ShopFilters = {
   wifiOnly: boolean;
   price: string;
   sort: ShopSort;
+};
+
+export type DemoStoreState = {
+  version: number;
+  favorites: string[];
+  submissions: CoffeeSubmission[];
 };

@@ -1,131 +1,257 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { findApprovedShopBySlug, getFavorites, toggleFavorite } from "@/lib/demo-store";
-import type { CoffeeShop } from "@/lib/types";
+
+import { FavoriteButton } from "@/components/favorite-button";
+import { useDemoStore } from "@/components/demo-store-provider";
+import { formatPriceLabel } from "@/lib/utils";
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-1 border-b border-white/10 pb-3 last:border-b-0 last:pb-0">
+      <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">
+        {label}
+      </dt>
+      <dd>{value}</dd>
+    </div>
+  );
+}
 
 export function CafeDetailClient({ slug }: { slug: string }) {
-  const [shop, setShop] = useState<CoffeeShop | null>(null);
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [ready, setReady] = useState(false);
+  const { hydrated, publicShops } = useDemoStore();
+  const shop = publicShops.find((item) => item.slug === slug);
 
-  useEffect(() => {
-    setShop(findApprovedShopBySlug(slug) ?? null);
-    setFavorites(getFavorites());
-    setReady(true);
-  }, [slug]);
-
-  if (!ready) {
-    return <div className="mx-auto max-w-5xl px-6 py-20 text-stone-500">Loading cafe...</div>;
-  }
-
-  if (!shop) {
+  if (!shop && !hydrated) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 text-center">
-        <p className="text-sm font-medium uppercase tracking-[0.3em] text-stone-500">Cafe not found</p>
-        <h1 className="mt-4 text-4xl font-semibold text-stone-900">Cafe ini belum approved atau slug tidak tersedia.</h1>
-        <p className="mt-3 text-stone-600">Cek halaman admin untuk approve submission, lalu buka lagi detail cafenya.</p>
-        <Link href="/" className="mt-6 rounded-full bg-stone-900 px-5 py-3 text-sm font-semibold text-white hover:bg-stone-700">
-          Kembali ke homepage
-        </Link>
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="h-[420px] animate-pulse rounded-[36px] bg-white/60" />
       </div>
     );
   }
 
-  const isFavorite = favorites.includes(shop.id);
+  if (!shop) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-14 text-center sm:px-6 lg:px-8">
+        <div className="rounded-[36px] border border-dashed border-slate-300 bg-white/70 p-10 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)]">
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Listing unavailable
+          </p>
+          <h1 className="mt-3 font-display text-5xl text-slate-950">
+            Cafe not found in this browser demo store.
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-500">
+            If this cafe was approved in another browser or another deploy,
+            localStorage will not follow it. This is expected for the demo-safe
+            architecture.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/"
+              className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white"
+            >
+              Back to listing
+            </Link>
+            <Link
+              href="/submit"
+              className="rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700"
+            >
+              Submit another cafe
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const related = publicShops
+    .filter(
+      (candidate) =>
+        candidate.slug !== shop.slug && candidate.city === shop.city,
+    )
+    .slice(0, 3);
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-8 md:px-10">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link href="/" className="text-sm font-medium text-stone-600 hover:text-stone-900">← Kembali ke discovery</Link>
-        <button
-          type="button"
-          onClick={() => setFavorites(toggleFavorite(shop.id))}
-          className={`rounded-full px-4 py-2 text-sm font-semibold ${isFavorite ? "bg-amber-400 text-stone-950" : "bg-stone-900 text-white"}`}
-        >
-          {isFavorite ? "Tersimpan di favorit" : "Simpan ke favorit"}
-        </button>
-      </div>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <section
+        className="relative overflow-hidden rounded-[38px] border border-white/70 bg-slate-900 bg-cover bg-center text-white shadow-[0_35px_90px_-45px_rgba(15,23,42,0.65)]"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(15,23,42,0.18), rgba(15,23,42,0.82)), url(${shop.imageUrl})`,
+        }}
+      >
+        <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:p-10">
+          <div className="space-y-6">
+            <Link
+              href="/"
+              className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white/90 backdrop-blur transition hover:bg-white/15"
+            >
+              Back to discover
+            </Link>
 
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="relative min-h-[380px] overflow-hidden rounded-[32px] bg-stone-200 shadow-lg">
-          <Image src={shop.imageUrl} alt={shop.name} fill className="object-cover" />
-        </div>
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/80">
+                  {shop.city}
+                </span>
+                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white/80">
+                  {shop.neighborhood}
+                </span>
+                {shop.source === "community" ? (
+                  <span className="rounded-full bg-teal-500/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">
+                    Community approved
+                  </span>
+                ) : null}
+              </div>
 
-        <div className="rounded-[32px] bg-stone-950 p-8 text-white shadow-lg">
-          <p className="text-sm uppercase tracking-[0.3em] text-amber-300">{shop.city}</p>
-          <h1 className="mt-3 text-4xl font-semibold">{shop.name}</h1>
-          <p className="mt-3 text-stone-300">{shop.neighborhood} • {shop.address}</p>
-          <p className="mt-6 text-lg leading-8 text-stone-200">{shop.longDescription}</p>
-
-          <div className="mt-8 grid grid-cols-2 gap-4 text-sm">
-            <div className="rounded-2xl bg-white/10 p-4">
-              <p className="text-stone-300">Rating</p>
-              <p className="mt-1 text-2xl font-semibold">⭐ {shop.rating.toFixed(1)}</p>
+              <div>
+                <h1 className="font-display text-5xl leading-none sm:text-6xl">
+                  {shop.name}
+                </h1>
+                <p className="mt-3 max-w-2xl text-lg leading-8 text-white/80">
+                  {shop.longDescription}
+                </p>
+              </div>
             </div>
-            <div className="rounded-2xl bg-white/10 p-4">
-              <p className="text-stone-300">Harga</p>
-              <p className="mt-1 text-2xl font-semibold">{shop.priceRange}</p>
+
+            <div className="flex flex-wrap gap-3">
+              <FavoriteButton slug={shop.slug} />
+              <a
+                href={shop.mapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
+              >
+                Open Maps
+              </a>
+              <a
+                href={shop.instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/15"
+              >
+                Instagram
+              </a>
             </div>
+          </div>
+
+          <div className="rounded-[30px] border border-white/15 bg-white/10 p-5 backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/65">
+              Snapshot
+            </p>
+            <dl className="mt-5 space-y-4 text-sm text-white/85">
+              <DetailRow label="Rating" value={`${shop.rating.toFixed(1)} / 5`} />
+              <DetailRow
+                label="Reviews"
+                value={`${shop.reviewCount} public reviews`}
+              />
+              <DetailRow label="Price" value={formatPriceLabel(shop.priceRange)} />
+              <DetailRow
+                label="WiFi"
+                value={shop.wifiFriendly ? "Remote-work ready" : "Casual browsing"}
+              />
+              <DetailRow label="Address" value={shop.address} />
+            </dl>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <aside className="space-y-6 rounded-[32px] border border-stone-200 bg-white p-6 shadow-sm">
-          <div>
-            <h2 className="text-lg font-semibold text-stone-900">Amenities</h2>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {shop.amenities.map((amenity) => (
-                <span key={amenity} className="rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-700">{amenity}</span>
-              ))}
-            </div>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-stone-900">Vibes</h2>
-            <div className="mt-3 flex flex-wrap gap-2">
+      <section className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="space-y-8">
+          <section className="rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Vibes
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
               {shop.vibes.map((vibe) => (
-                <span key={vibe} className="rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900">{vibe}</span>
+                <span
+                  key={vibe}
+                  className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700"
+                >
+                  {vibe}
+                </span>
               ))}
             </div>
-          </div>
-          <div>
-            <h2 className="text-lg font-semibold text-stone-900">Jam buka</h2>
-            <div className="mt-3 space-y-2 text-sm text-stone-600">
-              {shop.hours.map((entry) => (
-                <div key={entry.day} className="flex justify-between gap-4">
-                  <span>{entry.day}</span>
-                  <span className="font-medium text-stone-900">{entry.open}</span>
+
+            <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Amenities
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {shop.amenities.map((amenity) => (
+                <span
+                  key={amenity}
+                  className="rounded-full bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800"
+                >
+                  {amenity}
+                </span>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-[32px] border border-white/70 bg-white/80 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Opening hours
+            </p>
+            <div className="mt-4 grid gap-3">
+              {shop.hours.map((row) => (
+                <div
+                  key={row.day}
+                  className="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700"
+                >
+                  <span className="font-semibold">{row.day}</span>
+                  <span>{row.open}</span>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
+        </div>
+
+        <aside className="space-y-5">
+          <section className="rounded-[32px] border border-white/70 bg-white/80 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Nearby mood
+            </p>
+            <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">
+              More from {shop.city}
+            </h2>
+            <div className="mt-4 space-y-3">
+              {related.length > 0 ? (
+                related.map((candidate) => (
+                  <Link
+                    key={candidate.slug}
+                    href={`/cafes/${candidate.slug}`}
+                    className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-amber-300 hover:bg-amber-50"
+                  >
+                    <div className="text-sm font-semibold text-slate-900">
+                      {candidate.name}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {candidate.neighborhood}
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <p className="text-sm leading-6 text-slate-500">
+                  This is the only listed cafe from {shop.city} right now.
+                </p>
+              )}
+            </div>
+          </section>
+
+          {shop.source === "community" ? (
+            <section className="rounded-[32px] border border-teal-100 bg-teal-50 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">
+                Approval note
+              </p>
+              <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">
+                Community-approved listing
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-slate-600">
+                This cafe entered the catalog through the submit flow and was
+                approved from the demo admin page in this browser.
+              </p>
+            </section>
+          ) : null}
         </aside>
-
-        <section className="space-y-6 rounded-[32px] border border-stone-200 bg-white p-6 shadow-sm">
-          <div>
-            <h2 className="text-lg font-semibold text-stone-900">Kenapa worth it?</h2>
-            <p className="mt-3 leading-7 text-stone-600">{shop.description} Area ini pas untuk kamu yang cari tempat dengan akses nyaman, estetika rapi, dan pengalaman ngopi yang konsisten.</p>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <a href={shop.mapsUrl} target="_blank" rel="noreferrer" className="rounded-[28px] bg-stone-100 p-5 hover:bg-stone-200">
-              <p className="text-sm font-medium text-stone-500">Lokasi</p>
-              <p className="mt-2 text-lg font-semibold text-stone-900">Buka di Google Maps</p>
-            </a>
-            <a href={shop.instagramUrl} target="_blank" rel="noreferrer" className="rounded-[28px] bg-stone-100 p-5 hover:bg-stone-200">
-              <p className="text-sm font-medium text-stone-500">Social</p>
-              <p className="mt-2 text-lg font-semibold text-stone-900">Lihat Instagram cafe</p>
-            </a>
-          </div>
-
-          <div className="rounded-[28px] border border-dashed border-stone-300 p-5 text-sm leading-7 text-stone-500">
-            Demo ini local-first. Jika cafe berasal dari submission user, status approval dan detailnya tersimpan di browser kamu sendiri melalui localStorage.
-          </div>
-        </section>
       </section>
-    </main>
+    </div>
   );
 }

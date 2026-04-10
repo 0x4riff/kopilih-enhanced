@@ -1,233 +1,358 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { cityOptions, vibeOptions } from "@/lib/data";
-import { defaultFilters, filterShops, getApprovedShops, getFavorites, toggleFavorite } from "@/lib/demo-store";
-import type { CoffeeShop, ShopFilters } from "@/lib/types";
+import { useDeferredValue, useState } from "react";
+
+import { ShopCard } from "@/components/shop-card";
+import { useDemoStore } from "@/components/demo-store-provider";
+import {
+  defaultFilters,
+  filterShops,
+  getCityOptions,
+  getVibeOptions,
+} from "@/lib/demo-store";
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-sm backdrop-blur">
-      <p className="text-sm text-stone-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-stone-900">{value}</p>
+    <div className="rounded-[28px] border border-white/10 bg-white/10 p-4 backdrop-blur">
+      <div className="text-sm text-white/75">{label}</div>
+      <div className="mt-1 font-display text-4xl leading-none text-white">
+        {value}
+      </div>
     </div>
   );
 }
 
-function FavoriteButton({ id, favorites, onToggle }: { id: string; favorites: string[]; onToggle: (id: string) => void }) {
-  const active = favorites.includes(id);
-
+function SelectField({
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  options: string[];
+  value: string;
+}) {
   return (
-    <button
-      type="button"
-      onClick={() => onToggle(id)}
-      className={`rounded-full px-3 py-1 text-sm font-medium transition ${
-        active ? "bg-amber-500 text-stone-950" : "bg-stone-900 text-white hover:bg-stone-700"
-      }`}
-    >
-      {active ? "★ Favorit" : "☆ Simpan"}
-    </button>
+    <label className="space-y-2">
+      <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {label}
+      </span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option === "all"
+              ? `All ${label.toLowerCase()}s`
+              : option === "featured"
+                ? "Featured first"
+                : option === "rating"
+                  ? "Top rating"
+                  : option === "price-low"
+                    ? "Lowest price"
+                    : option === "name"
+                      ? "Alphabetical"
+                      : option}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
-function ShopCard({ shop, favorites, onToggleFavorite }: { shop: CoffeeShop; favorites: string[]; onToggleFavorite: (id: string) => void }) {
+function SidebarCard({
+  children,
+  eyebrow,
+  title,
+}: {
+  children: React.ReactNode;
+  eyebrow: string;
+  title: string;
+}) {
   return (
-    <article className="overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="relative h-56">
-        <Image src={shop.imageUrl} alt={shop.name} fill className="object-cover" />
-        <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-stone-700">
-            {shop.city}
-          </span>
-          <FavoriteButton id={shop.id} favorites={favorites} onToggle={onToggleFavorite} />
-        </div>
-      </div>
-
-      <div className="space-y-4 p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="text-xl font-semibold text-stone-900">{shop.name}</h3>
-            <p className="text-sm text-stone-500">{shop.neighborhood} • {shop.priceRange}</p>
-          </div>
-          <div className="rounded-2xl bg-emerald-50 px-3 py-2 text-right text-sm text-emerald-900">
-            <div className="font-semibold">⭐ {shop.rating.toFixed(1)}</div>
-            <div>{shop.reviewCount} reviews</div>
-          </div>
-        </div>
-
-        <p className="text-sm leading-6 text-stone-600">{shop.description}</p>
-
-        <div className="flex flex-wrap gap-2">
-          {shop.vibes.map((vibe) => (
-            <span key={vibe} className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700">
-              {vibe}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-stone-500">{shop.amenities.slice(0, 3).join(" • ")}</p>
-          <Link href={`/cafes/${shop.slug}`} className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-700">
-            Lihat detail
-          </Link>
-        </div>
-      </div>
-    </article>
+    <section className="rounded-[30px] border border-white/70 bg-white/80 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+        {eyebrow}
+      </p>
+      <h3 className="mt-2 font-display text-3xl leading-none text-slate-950">
+        {title}
+      </h3>
+      <div className="mt-4">{children}</div>
+    </section>
   );
 }
 
 export function HomePageClient() {
-  const [shops, setShops] = useState<CoffeeShop[]>([]);
-  const [favorites, setFavorites] = useState<string[]>([]);
-  const [filters, setFilters] = useState<ShopFilters>(defaultFilters);
+  const { counts, favoriteShops, publicShops } = useDemoStore();
+  const [filters, setFilters] = useState(defaultFilters);
+  const deferredQuery = useDeferredValue(filters.query);
 
-  useEffect(() => {
-    setShops(getApprovedShops());
-    setFavorites(getFavorites());
-  }, []);
+  const effectiveFilters = {
+    ...filters,
+    query: deferredQuery,
+  };
 
-  const filteredShops = useMemo(() => filterShops(shops, filters), [shops, filters]);
-  const featuredShops = filteredShops.filter((shop) => shop.featured).slice(0, 2);
-
-  function updateFilter<Key extends keyof ShopFilters>(key: Key, value: ShopFilters[Key]) {
-    setFilters((current) => ({ ...current, [key]: value }));
-  }
-
-  function handleToggleFavorite(id: string) {
-    setFavorites(toggleFavorite(id));
-  }
+  const cityOptions = getCityOptions(publicShops);
+  const vibeOptions = getVibeOptions(publicShops);
+  const filteredShops = filterShops(publicShops, effectiveFilters);
+  const communityShops = publicShops.filter(
+    (shop) => shop.source === "community",
+  );
 
   return (
-    <div className="bg-[radial-gradient(circle_at_top,_rgba(253,224,71,0.24),_transparent_28%),linear-gradient(180deg,_#fffdf8_0%,_#f5f1ea_100%)]">
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-14 px-6 py-8 md:px-10 lg:px-12">
-        <section className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-          <div className="rounded-[32px] bg-stone-950 px-8 py-10 text-white shadow-xl shadow-stone-950/10 md:px-10">
-            <p className="text-sm font-medium uppercase tracking-[0.3em] text-amber-300">Kopilih Enhanced</p>
-            <h1 className="mt-4 max-w-2xl text-4xl font-semibold leading-tight md:text-6xl">
-              Temukan kafe yang pas buat kerja, brunch, atau nongkrong santai.
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-stone-300 md:text-lg">
-              Demo discovery app local-first untuk eksplorasi kafe approved, simpan favorit, kirim rekomendasi baru, lalu uji approval flow admin tanpa backend server state.
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+      <section className="overflow-hidden rounded-[36px] border border-white/70 bg-[linear-gradient(135deg,#1f2937_0%,#3b2f2f_38%,#d97706_100%)] p-6 text-white shadow-[0_35px_90px_-45px_rgba(15,23,42,0.6)] sm:p-8 lg:p-10">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
+          <div className="space-y-6">
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-amber-200/90">
+              Local-first cafe discovery
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="#discover" className="rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold text-stone-950 hover:bg-amber-300">
+            <div className="space-y-4">
+              <h1 className="font-display text-5xl leading-none sm:text-6xl">
+                Temukan cafe yang enak dipakai hidup, kerja, dan balik lagi.
+              </h1>
+              <p className="max-w-2xl text-base leading-7 text-white/80 sm:text-lg">
+                Seeded editorial picks, community submissions, favorites in
+                localStorage, and a demo admin approval flow that stays safe to
+                deploy on Vercel.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <a
+                href="#discover"
+                className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-50"
+              >
                 Explore cafes
-              </Link>
-              <Link href="/submit" className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10">
-                Submit cafe baru
-              </Link>
-              <Link href="/admin/submissions" className="rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10">
-                Admin approval
+              </a>
+              <Link
+                href="/submit"
+                className="rounded-full border border-white/30 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Submit a new cafe
               </Link>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-            <StatCard label="Kafe approved" value={`${shops.length}`} />
-            <StatCard label="Favorit tersimpan" value={`${favorites.length}`} />
-            <StatCard label="Kota populer" value={`${cityOptions.length}`} />
-          </div>
-        </section>
-
-        <section className="grid gap-5 rounded-[32px] border border-stone-200 bg-white/90 p-6 shadow-sm md:grid-cols-2 xl:grid-cols-6" id="discover">
-          <div className="xl:col-span-2">
-            <label className="text-sm font-medium text-stone-700">Cari nama, kota, atau vibe</label>
-            <input
-              value={filters.query}
-              onChange={(event) => updateFilter("query", event.target.value)}
-              placeholder="Contoh: Bandung, brunch, work-friendly"
-              className="mt-2 w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900 outline-none ring-0 transition focus:border-amber-400"
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <StatCard label="Public cafes" value={String(publicShops.length)} />
+            <StatCard
+              label="Community picks"
+              value={String(communityShops.length)}
             />
+            <StatCard
+              label="Saved by you"
+              value={String(favoriteShops.length)}
+            />
+            <StatCard label="Pending review" value={String(counts.pending)} />
           </div>
+        </div>
+      </section>
 
-          <div>
-            <label className="text-sm font-medium text-stone-700">Kota</label>
-            <select value={filters.city} onChange={(event) => updateFilter("city", event.target.value)} className="mt-2 w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900">
-              <option value="all">Semua kota</option>
-              {cityOptions.map((city) => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-          </div>
+      <section className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-6" id="discover">
+          <div className="rounded-[32px] border border-white/70 bg-white/80 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+              <label className="space-y-2">
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Search
+                </span>
+                <input
+                  value={filters.query}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      query: event.target.value,
+                    }))
+                  }
+                  placeholder="Cafe, city, vibe"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400"
+                />
+              </label>
 
-          <div>
-            <label className="text-sm font-medium text-stone-700">Vibe</label>
-            <select value={filters.vibe} onChange={(event) => updateFilter("vibe", event.target.value)} className="mt-2 w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900">
-              <option value="all">Semua vibe</option>
-              {vibeOptions.map((vibe) => (
-                <option key={vibe} value={vibe}>{vibe}</option>
-              ))}
-            </select>
-          </div>
+              <SelectField
+                label="City"
+                value={filters.city}
+                onChange={(value) =>
+                  setFilters((current) => ({ ...current, city: value }))
+                }
+                options={["all", ...cityOptions]}
+              />
 
-          <div>
-            <label className="text-sm font-medium text-stone-700">Budget</label>
-            <select value={filters.price} onChange={(event) => updateFilter("price", event.target.value)} className="mt-2 w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900">
-              <option value="all">Semua harga</option>
-              <option value="$">$</option>
-              <option value="$$">$$</option>
-              <option value="$$$">$$$</option>
-            </select>
-          </div>
+              <SelectField
+                label="Vibe"
+                value={filters.vibe}
+                onChange={(value) =>
+                  setFilters((current) => ({ ...current, vibe: value }))
+                }
+                options={["all", ...vibeOptions]}
+              />
 
-          <div>
-            <label className="text-sm font-medium text-stone-700">Sort</label>
-            <select value={filters.sort} onChange={(event) => updateFilter("sort", event.target.value as ShopFilters["sort"])} className="mt-2 w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900">
-              <option value="featured">Featured</option>
-              <option value="rating">Rating tertinggi</option>
-              <option value="price-low">Harga terjangkau</option>
-              <option value="name">Nama A-Z</option>
-            </select>
-          </div>
+              <SelectField
+                label="Price"
+                value={filters.price}
+                onChange={(value) =>
+                  setFilters((current) => ({ ...current, price: value }))
+                }
+                options={["all", "$", "$$", "$$$"]}
+              />
 
-          <label className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-700 xl:mt-7">
-            <input type="checkbox" checked={filters.wifiOnly} onChange={(event) => updateFilter("wifiOnly", event.target.checked)} className="size-4 rounded border-stone-300" />
-            WiFi friendly only
-          </label>
-        </section>
-
-        {featuredShops.length > 0 && (
-          <section className="space-y-5">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium uppercase tracking-[0.2em] text-stone-500">Pilihan editor</p>
-                <h2 className="text-3xl font-semibold text-stone-900">Highlight minggu ini</h2>
-              </div>
+              <SelectField
+                label="Sort"
+                value={filters.sort}
+                onChange={(value) =>
+                  setFilters((current) => ({
+                    ...current,
+                    sort: value as typeof current.sort,
+                  }))
+                }
+                options={["featured", "rating", "price-low", "name"]}
+              />
             </div>
-            <div className="grid gap-6 xl:grid-cols-2">
-              {featuredShops.map((shop) => (
-                <ShopCard key={shop.id} shop={shop} favorites={favorites} onToggleFavorite={handleToggleFavorite} />
-              ))}
-            </div>
-          </section>
-        )}
 
-        <section className="space-y-5">
-          <div className="flex items-center justify-between gap-4">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <label className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={filters.wifiOnly}
+                  onChange={(event) =>
+                    setFilters((current) => ({
+                      ...current,
+                      wifiOnly: event.target.checked,
+                    }))
+                  }
+                  className="size-4 rounded border-slate-300 text-amber-500"
+                />
+                WiFi first
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setFilters(defaultFilters)}
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              >
+                Reset filters
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-end justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-semibold text-stone-900">Semua cafe approved</h2>
-              <p className="mt-1 text-sm text-stone-500">Hanya data seed dan submission yang sudah di-approve admin yang muncul di sini.</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Approved listing
+              </p>
+              <h2 className="font-display text-4xl leading-none text-slate-950">
+                {filteredShops.length} cafes ready to browse
+              </h2>
             </div>
-            <p className="rounded-full bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-sm">
-              {filteredShops.length} hasil
+            <p className="max-w-sm text-sm leading-6 text-slate-500">
+              Pending and rejected submissions stay off the public list until
+              the demo admin approves them.
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-            {filteredShops.map((shop) => (
-              <ShopCard key={shop.id} shop={shop} favorites={favorites} onToggleFavorite={handleToggleFavorite} />
-            ))}
-          </div>
-
-          {filteredShops.length === 0 && (
-            <div className="rounded-[28px] border border-dashed border-stone-300 bg-white p-10 text-center text-stone-500">
-              Belum ada hasil yang cocok. Coba ubah filter atau submit cafe baru.
+          {filteredShops.length > 0 ? (
+            <div className="grid gap-6 xl:grid-cols-2">
+              {filteredShops.map((shop) => (
+                <ShopCard key={shop.slug} shop={shop} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[30px] border border-dashed border-slate-300 bg-white/70 p-8 text-center text-slate-500">
+              No cafes match this filter set. Try widening the city, vibe, or
+              price filters.
             </div>
           )}
-        </section>
-      </main>
+        </div>
+
+        <aside className="space-y-5">
+          <SidebarCard
+            eyebrow="Your favorites"
+            title={
+              favoriteShops.length > 0
+                ? `${favoriteShops.length} cafe${favoriteShops.length > 1 ? "s" : ""} saved`
+                : "Nothing saved yet"
+            }
+          >
+            {favoriteShops.length > 0 ? (
+              <div className="space-y-3">
+                {favoriteShops.slice(0, 4).map((shop) => (
+                  <Link
+                    key={shop.slug}
+                    href={`/cafes/${shop.slug}`}
+                    className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-amber-300 hover:bg-amber-50"
+                  >
+                    <div className="text-sm font-semibold text-slate-900">
+                      {shop.name}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {shop.neighborhood}, {shop.city}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm leading-6 text-slate-500">
+                Use the Save button on any card to keep a shortlist in
+                localStorage for this browser.
+              </p>
+            )}
+          </SidebarCard>
+
+          <SidebarCard
+            eyebrow="Community picks"
+            title={`${communityShops.length} approved submission${communityShops.length > 1 ? "s" : ""}`}
+          >
+            {communityShops.length > 0 ? (
+              <div className="space-y-3">
+                {communityShops.slice(0, 3).map((shop) => (
+                  <Link
+                    key={shop.slug}
+                    href={`/cafes/${shop.slug}`}
+                    className="block rounded-2xl bg-teal-50 px-4 py-3 transition hover:bg-teal-100"
+                  >
+                    <div className="text-sm font-semibold text-slate-900">
+                      {shop.name}
+                    </div>
+                    <div className="text-xs text-slate-600">
+                      {shop.city} • community approved
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm leading-6 text-slate-500">
+                Approved submissions will show up here after moderation.
+              </p>
+            )}
+          </SidebarCard>
+
+          <SidebarCard eyebrow="Demo notes" title="Vercel-safe architecture">
+            <p className="text-sm leading-6 text-slate-500">
+              All mutable state lives in client-side localStorage. The seeded
+              listing renders safely at build time, then hydrates with your
+              browser-specific favorites and approvals.
+            </p>
+            <div className="mt-4 flex gap-3">
+              <Link
+                href="/submit"
+                className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                Submit flow
+              </Link>
+              <Link
+                href="/admin/submissions"
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Open admin
+              </Link>
+            </div>
+          </SidebarCard>
+        </aside>
+      </section>
     </div>
   );
 }

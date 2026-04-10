@@ -104,7 +104,11 @@ export function DemoStoreProvider({
         return next.state;
       });
 
-      return created as CoffeeSubmission;
+      if (!created) {
+        throw new Error("Failed to create submission");
+      }
+
+      return created;
     },
     reviewSubmission: (id, status, adminNote) => {
       let updated: CoffeeSubmission | null = null;
@@ -115,7 +119,7 @@ export function DemoStoreProvider({
         return next.state;
       });
 
-      return updated;
+      return updated ?? null;
     },
     resetDemo: () => {
       setState(resetDemoStore());
