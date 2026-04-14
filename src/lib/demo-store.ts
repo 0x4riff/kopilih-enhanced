@@ -1,15 +1,7 @@
-import { coffeeShops, seededSubmissions } from "./data";
-import type {
-  CoffeeShop,
-  CoffeeSubmission,
-  DemoStoreState,
-  ShopFilters,
-  SubmissionInput,
-  SubmissionStatus,
-} from "./types";
+import type { CoffeeShop, ShopFilters, DemoStoreState } from "./types";
 
-const STORE_VERSION = 1;
-const STORAGE_KEY = "kopilih:demo-store:v1";
+const STORE_VERSION = 2;
+const STORAGE_KEY = "kopilih:favorites:v2";
 
 export const defaultFilters: ShopFilters = {
   query: "",
@@ -20,11 +12,10 @@ export const defaultFilters: ShopFilters = {
   sort: "featured",
 };
 
-export function getInitialDemoState(): DemoStoreState {
+export function getInitialDemoState() {
   return {
     version: STORE_VERSION,
-    favorites: [],
-    submissions: seededSubmissions,
+    favorites: [] as string[],
   };
 }
 
@@ -32,195 +23,54 @@ function isBrowser() {
   return typeof window !== "undefined";
 }
 
-function isValidStore(value: unknown): value is DemoStoreState {
-  if (!value || typeof value !== "object") return false;
-  const candidate = value as Partial<DemoStoreState>;
-  return candidate.version === STORE_VERSION && Array.isArray(candidate.favorites) && Array.isArray(candidate.submissions);
-}
-
-export function readDemoStore() {
-  if (!isBrowser()) return getInitialDemoState();
-
+export function readFavoritesFromStorage(): string[] {
+  if (!isBrowser()) return [];
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return getInitialDemoState();
+    if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
-    return isValidStore(parsed) ? parsed : getInitialDemoState();
+    if (!parsed || typeof parsed !== "object") return [];
+    const candidate = parsed as Partial<{ version: number; favorites: unknown }>;
+    if (candidate.version !== STORE_VERSION || !Array.isArray(candidate.favorites)) return [];
+    return candidate.favorites.filter((f): f is string => typeof f === "string");
   } catch {
-    return getInitialDemoState();
+    return [];
   }
 }
 
-export function writeDemoStore(state: DemoStoreState) {
+export function writeFavoritesToStorage(favorites: string[]) {
   if (!isBrowser()) return;
+  const state: DemoStoreState = { version: STORE_VERSION, favorites };
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-export function resetDemoStore() {
-  const next = getInitialDemoState();
-  writeDemoStore(next);
+export function getFavorites(): string[] {
+  return readFavoritesFromStorage();
+}
+
+export function toggleFavorite(slug: string): string[] {
+  const current = readFavoritesFromStorage();
+  const next = current.includes(slug)
+    ? current.filter((f) => f !== slug)
+    : [...current, slug];
+  writeFavoritesToStorage(next);
   return next;
 }
 
-export function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function nextUniqueSlug(seed: string, submissions: CoffeeSubmission[]) {
-  const base = slugify(seed) || "coffee-spot";
-  const existing = new Set([
-    ...coffeeShops.map((shop) => shop.slug),
-    ...submissions.map((submission) => submission.slug),
-  ]);
-
-  if (!existing.has(base)) return base;
-  let index = 2;
-  while (existing.has(`${base}-${index}`)) index += 1;
-  return `${base}-${index}`;
-}
-
-export function submissionToCoffeeShop(submission: CoffeeSubmission): CoffeeShop {
-  return {
-    id: `approved-${submission.id}`,
-    slug: submission.slug,
-    name: submission.name,
-    city: submission.city,
-    neighborhood: submission.neighborhood || submission.city,
-    address: submission.address,
-    description: submission.description,
-    longDescription: `${submission.description} Listing ini muncul dari workflow submit user dan approval admin versi demo. Untuk production, data seperti validasi lokasi, foto, jam buka, dan audit trail approval sebaiknya dipindah ke database.`,
-    priceRange: submission.priceRange,
-    rating: 4.3,
-    reviewCount: 37,
-    vibes: submission.vibes,
-    amenities: submission.amenities as CoffeeShop["amenities"],
-    imageUrl:
-      submission.imageUrl ||
-      "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=1200&q=80",
-    mapsUrl: submission.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(submission.name)}`,
-    instagramUrl: submission.instagramUrl || "https://instagram.com",
-    hours: [
-      { day: "Senin - Jumat", open: "08.00 - 21.00" },
-      { day: "Sabtu - Minggu", open: "08.00 - 22.00" },
-    ],
-    wifiFriendly: submission.amenities.includes("WiFi cepat"),
-    featured: false,
-    source: "community",
-  };
-}
-
-export function getSeededPublicShops() {
-  return [
-    ...coffeeShops,
-    ...seededSubmissions.filter((submission) => submission.status === "approved").map(submissionToCoffeeShop),
-  ];
-}
-
-export function getPublicShops(submissions: CoffeeSubmission[]) {
-  return [
-    ...coffeeShops,
-    ...submissions.filter((submission) => submission.status === "approved").map(submissionToCoffeeShop),
-  ];
-}
-
-export function getApprovedShops() {
-  return getPublicShops(getSubmissions());
-}
-
-export function getApprovedCoffeeShops() {
-  return getApprovedShops();
-}
-
-export function findPublicShopBySlug(submissions: CoffeeSubmission[], slug: string) {
-  return getPublicShops(submissions).find((shop) => shop.slug === slug);
-}
-
-export function findApprovedShopBySlug(slug: string) {
-  return getApprovedShops().find((shop) => shop.slug === slug);
-}
-
-export function createSubmissionInState(state: DemoStoreState, input: SubmissionInput) {
-  const submission: CoffeeSubmission = {
-    ...input,
-    id: `submission-${Date.now()}`,
-    slug: nextUniqueSlug(`${input.name}-${input.city}`, state.submissions),
-    submittedAt: new Date().toISOString(),
-    status: "pending",
-  };
-
-  return {
-    state: {
-      ...state,
-      submissions: [submission, ...state.submissions],
-    },
-    submission,
-  };
-}
-
-export function reviewSubmissionInState(state: DemoStoreState, id: string, status: SubmissionStatus, adminNote?: string) {
-  let updated: CoffeeSubmission | null = null;
-
-  const submissions = state.submissions.map((submission) => {
-    if (submission.id !== id) return submission;
-    updated = { ...submission, status, adminNote };
-    return updated;
-  });
-
-  return {
-    state: { ...state, submissions },
-    submission: updated,
-  };
-}
-
-export function toggleFavoriteInState(state: DemoStoreState, slug: string) {
-  const favorites = state.favorites.includes(slug)
-    ? state.favorites.filter((item) => item !== slug)
-    : [...state.favorites, slug];
-
-  return { ...state, favorites };
-}
-
-export function countSubmissionsByStatus(submissions: CoffeeSubmission[]) {
-  return submissions.reduce(
-    (counts, submission) => {
-      counts[submission.status] += 1;
-      return counts;
-    },
-    { pending: 0, approved: 0, rejected: 0 },
+export function getCityOptions(shops: CoffeeShop[]) {
+  return Array.from(new Set(shops.map((shop) => shop.city))).sort((a, b) =>
+    a.localeCompare(b)
   );
 }
 
-export function sortSubmissions(submissions: CoffeeSubmission[]) {
-  const statusOrder: Record<SubmissionStatus, number> = {
-    pending: 0,
-    approved: 1,
-    rejected: 2,
-  };
-
-  return [...submissions].sort((left, right) => {
-    const byStatus = statusOrder[left.status] - statusOrder[right.status];
-    if (byStatus !== 0) return byStatus;
-    return new Date(right.submittedAt).getTime() - new Date(left.submittedAt).getTime();
-  });
-}
-
-export function getCityOptions(shops: CoffeeShop[]) {
-  return Array.from(new Set(shops.map((shop) => shop.city))).sort((a, b) => a.localeCompare(b));
-}
-
 export function getVibeOptions(shops: CoffeeShop[]) {
-  return Array.from(new Set(shops.flatMap((shop) => shop.vibes))).sort((a, b) => a.localeCompare(b));
+  return Array.from(new Set(shops.flatMap((shop) => shop.vibes))).sort((a, b) =>
+    a.localeCompare(b)
+  );
 }
 
 export function filterShops(shops: CoffeeShop[], filters: ShopFilters) {
   const query = filters.query.trim().toLowerCase();
-
   const filtered = shops.filter((shop) => {
     const haystack = [shop.name, shop.city, shop.neighborhood, shop.description, ...shop.vibes].join(" ").toLowerCase();
     const matchesQuery = !query || haystack.includes(query);
@@ -244,35 +94,4 @@ export function filterShops(shops: CoffeeShop[], filters: ShopFilters) {
         return Number(Boolean(right.featured)) - Number(Boolean(left.featured)) || right.rating - left.rating;
     }
   });
-}
-
-export function getFavorites() {
-  return readDemoStore().favorites;
-}
-
-export function toggleFavorite(slug: string) {
-  const next = toggleFavoriteInState(readDemoStore(), slug);
-  writeDemoStore(next);
-  return next.favorites;
-}
-
-export function getSubmissions() {
-  return readDemoStore().submissions;
-}
-
-export function saveSubmissions(submissions: CoffeeSubmission[]) {
-  const current = readDemoStore();
-  writeDemoStore({ ...current, submissions });
-}
-
-export function createSubmission(payload: SubmissionInput) {
-  const next = createSubmissionInState(readDemoStore(), payload);
-  writeDemoStore(next.state);
-  return next.submission;
-}
-
-export function updateSubmissionStatus(id: string, status: SubmissionStatus, adminNote?: string) {
-  const next = reviewSubmissionInState(readDemoStore(), id, status, adminNote);
-  writeDemoStore(next.state);
-  return next.submission;
 }
