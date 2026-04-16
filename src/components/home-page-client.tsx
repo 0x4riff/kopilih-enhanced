@@ -67,11 +67,21 @@ export function HomePageClient() {
   const [usingSupabase, setUsingSupabase] = useState(false);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [locationError, setLocationError] = useState("");
+  const [distanceRadiusKm, setDistanceRadiusKm] = useState<number | null>(null);
   const [filters, setFilters] = useState<ShopFilters>({ ...defaultFilters, sort: "featured" });
   const deferredQuery = useDeferredValue(filters.query);
 
   useEffect(() => {
     setFavorites(getFavorites());
+
+    if (typeof window !== "undefined") {
+      const saved = window.localStorage.getItem("kopilih:user-location");
+      if (saved) {
+        try {
+          setUserLocation(JSON.parse(saved) as Coordinates);
+        } catch {}
+      }
+    }
 
     async function loadCafes() {
       try {
@@ -113,7 +123,11 @@ export function HomePageClient() {
   const effectiveFilters = { ...filters, query: deferredQuery };
   const cityOptions = useMemo(() => getCityOptions(publicShops), [publicShops]);
   const vibeOptions = useMemo(() => getVibeOptions(publicShops), [publicShops]);
-  const filteredShops = useMemo(() => filterAndSortShops(publicShops, effectiveFilters, userLocation), [publicShops, effectiveFilters, userLocation]);
+  const filteredShops = useMemo(() => {
+    const sorted = filterAndSortShops(publicShops, effectiveFilters, userLocation);
+    if (!userLocation || !distanceRadiusKm) return sorted;
+    return sorted.filter((shop) => shop.coordinates && calculateDistanceKm(userLocation, shop.coordinates) <= distanceRadiusKm);
+  }, [publicShops, effectiveFilters, userLocation, distanceRadiusKm]);
   const favoriteShops = useMemo(() => publicShops.filter((shop) => favorites.includes(shop.slug)), [publicShops, favorites]);
   const communityShops = useMemo(() => publicShops.filter((shop) => shop.source === "community"), [publicShops]);
   const nearestShop = useMemo(() => {
@@ -129,7 +143,9 @@ export function HomePageClient() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+        const nextLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setUserLocation(nextLocation);
+        window.localStorage.setItem("kopilih:user-location", JSON.stringify(nextLocation));
         setLocationError("");
         setFilters((current) => ({ ...current, sort: "nearest" }));
       },
@@ -171,7 +187,7 @@ export function HomePageClient() {
 
             <div className="flex flex-wrap gap-3 text-sm text-white/70">
               <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Near me sorting</span>
-              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Curated feel</span>
+              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Distance badges</span>
               <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Community submissions</span>
             </div>
 
@@ -213,7 +229,8 @@ export function HomePageClient() {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-800">
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-800">
                 <input
                   type="checkbox"
                   checked={filters.wifiOnly}
@@ -221,11 +238,29 @@ export function HomePageClient() {
                   className="size-4 rounded border-slate-300 text-amber-500"
                 />
                 WiFi first
-              </label>
+                </label>
+                {userLocation ? (
+                  <div className="flex flex-wrap gap-2">
+                    {[5, 10].map((radius) => (
+                      <button
+                        key={radius}
+                        type="button"
+                        onClick={() => setDistanceRadiusKm((current) => (current === radius ? null : radius))}
+                        className={`rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition ${distanceRadiusKm === radius ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-white text-slate-900 hover:bg-slate-50"}`}
+                      >
+                        Within {radius} km
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
 
               <button
                 type="button"
-                onClick={() => setFilters({ ...defaultFilters, sort: userLocation ? "nearest" : "featured" })}
+                onClick={() => {
+                  setFilters({ ...defaultFilters, sort: userLocation ? "nearest" : "featured" });
+                  setDistanceRadiusKm(null);
+                }}
                 className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
               >
                 Reset filters
@@ -267,9 +302,14 @@ export function HomePageClient() {
                 <p>{nearestShop.neighborhood}, {nearestShop.city}</p>
                 <p>{nearestShop.address}</p>
                 {nearestShop.coordinates ? <p>{formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates))} dari titikmu</p> : null}
-                <Link href={`/cafes/${nearestShop.slug}`} className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">
-                  Open nearest cafe
-                </Link>
+                <div className="flex flex-wrap gap-3">
+                  <Link href={`/cafes/${nearestShop.slug}`} className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">
+                    Open nearest cafe
+                  </Link>
+                  <a href={nearestShop.mapsUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm">
+                    Open route
+                  </a>
+                </div>
               </div>
             ) : (
               <p className="text-sm leading-6 text-slate-500">Aktifkan lokasi untuk melihat cafe paling dekat dari titikmu sekarang.</p>
