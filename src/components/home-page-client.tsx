@@ -4,16 +4,16 @@ import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 import { ShopCard } from "@/components/shop-card";
-import { defaultFilters, filterShops, getCityOptions, getFavorites, getVibeOptions, toggleFavorite } from "@/lib/demo-store";
+import { defaultFilters, filterShops, getCityOptions, getFavorites, getVibeOptions } from "@/lib/demo-store";
 import { getFallbackCoffeeShops, mapCafeRowToCoffeeShop } from "@/lib/supabase-mappers";
 import { getSupabaseBrowserClient, hasSupabaseEnv } from "@/lib/supabase";
 import type { CoffeeShop } from "@/lib/types";
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[28px] border border-white/20 bg-slate-950/25 p-4 backdrop-blur-sm">
-      <div className="text-sm font-medium text-white/80">{label}</div>
-      <div className="mt-1 text-4xl font-semibold leading-none text-white">{value}</div>
+    <div className="rounded-[28px] border border-white/10 bg-black/20 p-5 backdrop-blur-sm">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/65">{label}</div>
+      <div className="mt-3 text-4xl font-semibold leading-none text-white">{value}</div>
     </div>
   );
 }
@@ -25,7 +25,7 @@ function SelectField({ label, onChange, options, value }: { label: string; onCha
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400"
+        className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
       >
         {options.map((option) => (
           <option key={option} value={option}>
@@ -49,7 +49,7 @@ function SelectField({ label, onChange, options, value }: { label: string; onCha
 
 function SidebarCard({ children, eyebrow, title }: { children: React.ReactNode; eyebrow: string; title: string }) {
   return (
-    <section className="rounded-[30px] border border-white/70 bg-white/80 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+    <section className="rounded-[30px] border border-white/70 bg-white/85 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.35)] backdrop-blur">
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{eyebrow}</p>
       <h3 className="mt-2 text-3xl font-semibold leading-none text-slate-950">{title}</h3>
       <div className="mt-4">{children}</div>
@@ -69,14 +69,14 @@ export function HomePageClient() {
     setFavorites(getFavorites());
 
     async function loadCafes() {
-      if (!hasSupabaseEnv()) {
-        setPublicShops(getFallbackCoffeeShops());
-        setLoading(false);
-        return;
-      }
-
       try {
-        const supabase = getSupabaseBrowserClient();
+        if (!hasSupabaseEnv()) {
+          setPublicShops(getFallbackCoffeeShops());
+          setUsingSupabase(false);
+          return;
+        }
+
+        const supabase = getSupabaseBrowserClient() as any;
         const { data, error } = await supabase
           .from("cafes")
           .select("*")
@@ -86,7 +86,7 @@ export function HomePageClient() {
 
         if (error) throw error;
 
-        if (data && data.length > 0) {
+        if (data?.length) {
           setPublicShops(data.map(mapCafeRowToCoffeeShop));
           setUsingSupabase(true);
         } else {
@@ -94,7 +94,7 @@ export function HomePageClient() {
           setUsingSupabase(false);
         }
       } catch (error) {
-        console.error("Failed to load Supabase cafes", error);
+        console.error("Failed to load cafes", error);
         setPublicShops(getFallbackCoffeeShops());
         setUsingSupabase(false);
       } finally {
@@ -112,35 +112,40 @@ export function HomePageClient() {
   const favoriteShops = useMemo(() => publicShops.filter((shop) => favorites.includes(shop.slug)), [publicShops, favorites]);
   const communityShops = useMemo(() => publicShops.filter((shop) => shop.source === "community"), [publicShops]);
 
-  const counts = {
-    pending: 0,
-    approved: communityShops.length,
-    rejected: 0,
-  };
-
-  function handleFavoriteToggle(slug: string) {
-    setFavorites(toggleFavorite(slug));
-  }
-
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <section className="overflow-hidden rounded-[36px] border border-white/70 bg-[linear-gradient(135deg,#1f2937_0%,#3b2f2f_38%,#d97706_100%)] p-6 text-white shadow-[0_35px_90px_-45px_rgba(15,23,42,0.6)] sm:p-8 lg:p-10">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_320px] lg:items-end">
-          <div className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-amber-200/90">Kopilih Enhanced</p>
+      <section className="overflow-hidden rounded-[40px] border border-[#4b382d] bg-[linear-gradient(135deg,#111827_0%,#2b211d_45%,#8b4a13_100%)] p-6 text-white shadow-[0_40px_120px_-55px_rgba(15,23,42,0.75)] sm:p-8 lg:p-10">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_300px] lg:items-end">
+          <div className="space-y-7">
             <div className="space-y-4">
-              <h1 className="text-5xl font-semibold leading-none sm:text-6xl">Temukan cafe yang enak dipakai hidup, kerja, dan balik lagi.</h1>
-              <p className="max-w-2xl text-base leading-7 text-white/80 sm:text-lg">
-                Discovery app untuk cafe Indonesia, sekarang siap naik level dari demo ke backend Supabase.
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-amber-200">Kopilih Enhanced</p>
+              <h1 className="max-w-3xl text-5xl font-semibold leading-[0.96] text-white sm:text-6xl lg:text-7xl">
+                Temukan cafe yang terasa tepat, bukan sekadar ramai.
+              </h1>
+              <p className="max-w-2xl text-base leading-8 text-white/78 sm:text-lg">
+                Kurasi cafe Indonesia untuk kerja, meeting santai, deep focus, atau sekadar menikmati suasana yang ingin kamu ulang lagi.
               </p>
             </div>
+
             <div className="flex flex-wrap gap-3">
-              <a href="#discover" className="rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-50">
+              <a
+                href="#discover"
+                className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-white/70"
+              >
                 Explore cafes
               </a>
-              <Link href="/submit" className="rounded-full border border-white/60 bg-white/12 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/70">
+              <Link
+                href="/submit"
+                className="inline-flex items-center rounded-full border border-white/35 bg-black/10 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/60"
+              >
                 Submit a new cafe
               </Link>
+            </div>
+
+            <div className="flex flex-wrap gap-3 text-sm text-white/70">
+              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Curated feel</span>
+              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Community submissions</span>
+              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Local favorites</span>
             </div>
           </div>
 
@@ -148,14 +153,14 @@ export function HomePageClient() {
             <StatCard label="Public cafes" value={String(publicShops.length)} />
             <StatCard label="Community picks" value={String(communityShops.length)} />
             <StatCard label="Saved by you" value={String(favoriteShops.length)} />
-            <StatCard label={usingSupabase ? "Supabase mode" : "Demo mode"} value={loading ? "..." : usingSupabase ? "ON" : "LOCAL"} />
+            <StatCard label={loading ? "Loading source" : usingSupabase ? "Live source" : "Fallback source"} value={loading ? "..." : usingSupabase ? "SUPABASE" : "CURATED"} />
           </div>
         </div>
       </section>
 
       <section className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6" id="discover">
-          <div className="rounded-[32px] border border-white/70 bg-white/80 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+          <div className="rounded-[32px] border border-white/80 bg-white/90 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.25)] backdrop-blur">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               <label className="space-y-2">
                 <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Search</span>
@@ -163,7 +168,7 @@ export function HomePageClient() {
                   value={filters.query}
                   onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))}
                   placeholder="Cafe, city, vibe"
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                 />
               </label>
 
@@ -174,7 +179,7 @@ export function HomePageClient() {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <label className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700">
+              <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-800">
                 <input
                   type="checkbox"
                   checked={filters.wifiOnly}
@@ -184,26 +189,32 @@ export function HomePageClient() {
                 WiFi first
               </label>
 
-              <button type="button" onClick={() => setFilters(defaultFilters)} className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+              <button
+                type="button"
+                onClick={() => setFilters(defaultFilters)}
+                className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              >
                 Reset filters
               </button>
             </div>
           </div>
 
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Approved listing</p>
               <h2 className="text-4xl font-semibold leading-none text-slate-950">{filteredShops.length} cafes ready to browse</h2>
             </div>
-            <p className="max-w-sm text-sm leading-6 text-slate-600">
-              {usingSupabase ? "Data sekarang diambil langsung dari Supabase published cafes." : "Masih fallback ke seeded demo data lokal. Aku sudah tambahkan fallback Supabase key supaya mode LOCAL tidak nyangkut lagi setelah redeploy."}
+            <p className="max-w-md text-sm leading-6 text-slate-600">
+              {usingSupabase
+                ? "Data sekarang diambil dari katalog live Supabase dan tetap terasa cepat dibuka."
+                : "Saat koneksi live belum terbaca, halaman tetap menampilkan katalog kurasi agar pengalaman browsing tidak kosong."}
             </p>
           </div>
 
           {filteredShops.length > 0 ? (
             <div className="grid gap-6 xl:grid-cols-2">
               {filteredShops.map((shop) => (
-                <div key={shop.slug} onClick={() => undefined}>
+                <div key={shop.slug}>
                   <ShopCard shop={shop} />
                 </div>
               ))}
@@ -220,14 +231,14 @@ export function HomePageClient() {
             {favoriteShops.length > 0 ? (
               <div className="space-y-3">
                 {favoriteShops.slice(0, 4).map((shop) => (
-                  <Link key={shop.slug} href={`/cafes/${shop.slug}`} className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-amber-300 hover:bg-amber-50">
+                  <Link key={shop.slug} href={`/cafes/${shop.slug}`} className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm transition hover:border-amber-300 hover:bg-amber-50">
                     <div className="text-sm font-semibold text-slate-900">{shop.name}</div>
                     <div className="text-xs text-slate-500">{shop.neighborhood}, {shop.city}</div>
                   </Link>
                 ))}
               </div>
             ) : (
-              <p className="text-sm leading-6 text-slate-500">Use the Save button on any card to keep a shortlist in localStorage for this browser.</p>
+              <p className="text-sm leading-6 text-slate-500">Use Save pada card cafe untuk menyimpan shortlist personal di browser ini.</p>
             )}
           </SidebarCard>
 
@@ -235,7 +246,7 @@ export function HomePageClient() {
             {communityShops.length > 0 ? (
               <div className="space-y-3">
                 {communityShops.slice(0, 3).map((shop) => (
-                  <Link key={shop.slug} href={`/cafes/${shop.slug}`} className="block rounded-2xl bg-teal-50 px-4 py-3 transition hover:bg-teal-100">
+                  <Link key={shop.slug} href={`/cafes/${shop.slug}`} className="block rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 shadow-sm transition hover:bg-teal-100">
                     <div className="text-sm font-semibold text-slate-900">{shop.name}</div>
                     <div className="text-xs text-slate-600">{shop.city}, community approved</div>
                   </Link>
@@ -246,9 +257,9 @@ export function HomePageClient() {
             )}
           </SidebarCard>
 
-          <SidebarCard eyebrow="Status" title="Transition to Supabase">
-            <p className="text-sm leading-6 text-slate-500">
-              Submit and admin review flow akan diarahkan ke database. Favorites tetap aman disimpan lokal di browser.
+          <SidebarCard eyebrow="Experience" title="Lebih rapi, lebih premium">
+            <p className="text-sm leading-6 text-slate-600">
+              Tampilan sekarang dibuat lebih editorial dan lebih tenang, supaya terasa seperti produk kurasi, bukan sekadar template demo.
             </p>
             <div className="mt-4 flex gap-3">
               <Link href="/submit" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">
