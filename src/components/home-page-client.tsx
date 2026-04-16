@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 import { ShopCard } from "@/components/shop-card";
-import { defaultFilters, filterShops, getCityOptions, getFavorites, getVibeOptions } from "@/lib/demo-store";
+import { defaultFilters, getCityOptions, getFavorites, getVibeOptions } from "@/lib/demo-store";
 import { getFallbackCoffeeShops, mapCafeRowToCoffeeShop } from "@/lib/supabase-mappers";
 import { getSupabaseBrowserClient, hasSupabaseEnv } from "@/lib/supabase";
-import type { CoffeeShop } from "@/lib/types";
+import type { CoffeeShop, Coordinates, ShopFilters } from "@/lib/types";
+import { filterAndSortShops, formatDistanceKm } from "@/lib/utils";
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
@@ -39,7 +40,9 @@ function SelectField({ label, onChange, options, value }: { label: string; onCha
                     ? "Lowest price"
                     : option === "name"
                       ? "Alphabetical"
-                      : option}
+                      : option === "nearest"
+                        ? "Nearest to you"
+                        : option}
           </option>
         ))}
       </select>
@@ -62,7 +65,9 @@ export function HomePageClient() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [usingSupabase, setUsingSupabase] = useState(false);
-  const [filters, setFilters] = useState(defaultFilters);
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
+  const [locationError, setLocationError] = useState("");
+  const [filters, setFilters] = useState<ShopFilters>({ ...defaultFilters, sort: "featured" });
   const deferredQuery = useDeferredValue(filters.query);
 
   useEffect(() => {
@@ -108,9 +113,30 @@ export function HomePageClient() {
   const effectiveFilters = { ...filters, query: deferredQuery };
   const cityOptions = useMemo(() => getCityOptions(publicShops), [publicShops]);
   const vibeOptions = useMemo(() => getVibeOptions(publicShops), [publicShops]);
-  const filteredShops = useMemo(() => filterShops(publicShops, effectiveFilters), [publicShops, effectiveFilters]);
+  const filteredShops = useMemo(() => filterAndSortShops(publicShops, effectiveFilters, userLocation), [publicShops, effectiveFilters, userLocation]);
   const favoriteShops = useMemo(() => publicShops.filter((shop) => favorites.includes(shop.slug)), [publicShops, favorites]);
   const communityShops = useMemo(() => publicShops.filter((shop) => shop.source === "community"), [publicShops]);
+  const nearestShop = useMemo(() => {
+    if (!userLocation) return null;
+    return filterAndSortShops(publicShops, { ...defaultFilters, sort: "nearest" }, userLocation)[0] ?? null;
+  }, [publicShops, userLocation]);
+
+  function handleUseMyLocation() {
+    if (!navigator.geolocation) {
+      setLocationError("Browser ini belum support geolocation.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setLocationError("");
+        setFilters((current) => ({ ...current, sort: "nearest" }));
+      },
+      () => setLocationError("Lokasi belum bisa diambil. Pastikan izin lokasi aktif."),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
@@ -118,22 +144,23 @@ export function HomePageClient() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_300px] lg:items-end">
           <div className="space-y-7">
             <div className="space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-amber-200">Kopilih Enhanced</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-amber-200">KOPILIH</p>
               <h1 className="max-w-3xl text-5xl font-semibold leading-[0.96] text-white sm:text-6xl lg:text-7xl">
-                Temukan cafe yang terasa tepat, bukan sekadar ramai.
+                Temukan cafe terbaik yang paling pas, dan paling dekat.
               </h1>
               <p className="max-w-2xl text-base leading-8 text-white/78 sm:text-lg">
-                Kurasi cafe Indonesia untuk kerja, meeting santai, deep focus, atau sekadar menikmati suasana yang ingin kamu ulang lagi.
+                Kurasi cafe Indonesia untuk kerja, meeting santai, deep focus, atau sekadar menikmati suasana, sekarang dengan mode lokasi terdekat.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <a
-                href="#discover"
+              <button
+                type="button"
+                onClick={handleUseMyLocation}
                 className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-white/70"
               >
-                Explore cafes
-              </a>
+                Use my location
+              </button>
               <Link
                 href="/submit"
                 className="inline-flex items-center rounded-full border border-white/35 bg-black/10 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/60"
@@ -143,10 +170,17 @@ export function HomePageClient() {
             </div>
 
             <div className="flex flex-wrap gap-3 text-sm text-white/70">
+              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Near me sorting</span>
               <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Curated feel</span>
               <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Community submissions</span>
-              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Local favorites</span>
             </div>
+
+            {locationError ? <p className="text-sm text-amber-100">{locationError}</p> : null}
+            {nearestShop && userLocation ? (
+              <p className="text-sm text-white/80">
+                Nearest right now: <span className="font-semibold text-white">{nearestShop.name}</span> · {formatDistanceKm(Math.hypot((nearestShop.coordinates?.lat ?? 0) - userLocation.lat, (nearestShop.coordinates?.lng ?? 0) - userLocation.lng) * 111)}
+              </p>
+            ) : null}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -175,7 +209,7 @@ export function HomePageClient() {
               <SelectField label="City" value={filters.city} onChange={(value) => setFilters((current) => ({ ...current, city: value }))} options={["all", ...cityOptions]} />
               <SelectField label="Vibe" value={filters.vibe} onChange={(value) => setFilters((current) => ({ ...current, vibe: value }))} options={["all", ...vibeOptions]} />
               <SelectField label="Price" value={filters.price} onChange={(value) => setFilters((current) => ({ ...current, price: value }))} options={["all", "$", "$$", "$$$"]} />
-              <SelectField label="Sort" value={filters.sort} onChange={(value) => setFilters((current) => ({ ...current, sort: value as typeof current.sort }))} options={["featured", "rating", "price-low", "name"]} />
+              <SelectField label="Sort" value={filters.sort} onChange={(value) => setFilters((current) => ({ ...current, sort: value as typeof current.sort }))} options={["featured", "rating", "price-low", "name", ...(userLocation ? ["nearest"] : [])]} />
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -191,7 +225,7 @@ export function HomePageClient() {
 
               <button
                 type="button"
-                onClick={() => setFilters(defaultFilters)}
+                onClick={() => setFilters({ ...defaultFilters, sort: userLocation ? "nearest" : "featured" })}
                 className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
               >
                 Reset filters
@@ -206,7 +240,7 @@ export function HomePageClient() {
             </div>
             <p className="max-w-md text-sm leading-6 text-slate-600">
               {usingSupabase
-                ? "Data sekarang diambil dari katalog live Supabase dan tetap terasa cepat dibuka."
+                ? "Data sekarang diambil dari katalog live Supabase. Sorting nearest aktif saat izin lokasi diberikan."
                 : "Saat koneksi live belum terbaca, halaman tetap menampilkan katalog kurasi agar pengalaman browsing tidak kosong."}
             </p>
           </div>
@@ -227,6 +261,20 @@ export function HomePageClient() {
         </div>
 
         <aside className="space-y-5">
+          <SidebarCard eyebrow="Nearest to you" title={nearestShop ? nearestShop.name : "Location not active"}>
+            {nearestShop && userLocation ? (
+              <div className="space-y-2 text-sm text-slate-600">
+                <p>{nearestShop.neighborhood}, {nearestShop.city}</p>
+                <p>{nearestShop.address}</p>
+                <Link href={`/cafes/${nearestShop.slug}`} className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">
+                  Open nearest cafe
+                </Link>
+              </div>
+            ) : (
+              <p className="text-sm leading-6 text-slate-500">Aktifkan lokasi untuk melihat cafe paling dekat dari titikmu sekarang.</p>
+            )}
+          </SidebarCard>
+
           <SidebarCard eyebrow="Your favorites" title={favoriteShops.length > 0 ? `${favoriteShops.length} cafe${favoriteShops.length > 1 ? "s" : ""} saved` : "Nothing saved yet"}>
             {favoriteShops.length > 0 ? (
               <div className="space-y-3">
@@ -240,35 +288,6 @@ export function HomePageClient() {
             ) : (
               <p className="text-sm leading-6 text-slate-500">Use Save pada card cafe untuk menyimpan shortlist personal di browser ini.</p>
             )}
-          </SidebarCard>
-
-          <SidebarCard eyebrow="Community picks" title={`${communityShops.length} approved submission${communityShops.length > 1 ? "s" : ""}`}>
-            {communityShops.length > 0 ? (
-              <div className="space-y-3">
-                {communityShops.slice(0, 3).map((shop) => (
-                  <Link key={shop.slug} href={`/cafes/${shop.slug}`} className="block rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3 shadow-sm transition hover:bg-teal-100">
-                    <div className="text-sm font-semibold text-slate-900">{shop.name}</div>
-                    <div className="text-xs text-slate-600">{shop.city}, community approved</div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm leading-6 text-slate-500">Approved submissions will show up here after moderation.</p>
-            )}
-          </SidebarCard>
-
-          <SidebarCard eyebrow="Experience" title="Lebih rapi, lebih premium">
-            <p className="text-sm leading-6 text-slate-600">
-              Tampilan sekarang dibuat lebih editorial dan lebih tenang, supaya terasa seperti produk kurasi, bukan sekadar template demo.
-            </p>
-            <div className="mt-4 flex gap-3">
-              <Link href="/submit" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                Submit flow
-              </Link>
-              <Link href="/admin/submissions" className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                Open admin
-              </Link>
-            </div>
           </SidebarCard>
         </aside>
       </section>

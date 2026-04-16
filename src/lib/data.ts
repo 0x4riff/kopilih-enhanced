@@ -53,6 +53,7 @@ export const coffeeShops: CoffeeShop[] = [
     featured: true,
     wifiFriendly: true,
     source: "editorial",
+    coordinates: { lat: -6.244669, lng: 106.814298 },
   },
   {
     id: "seed-2",
@@ -78,6 +79,7 @@ export const coffeeShops: CoffeeShop[] = [
     featured: true,
     wifiFriendly: true,
     source: "editorial",
+    coordinates: { lat: -8.685657, lng: 115.167457 },
   },
   {
     id: "seed-3",
@@ -105,6 +107,7 @@ export const coffeeShops: CoffeeShop[] = [
     ],
     wifiFriendly: true,
     source: "editorial",
+    coordinates: { lat: -6.889836, lng: 107.613144 },
   },
   {
     id: "seed-4",
@@ -129,6 +132,7 @@ export const coffeeShops: CoffeeShop[] = [
     hours: [{ day: "Setiap hari", open: "08.00 - 21.00" }],
     wifiFriendly: true,
     source: "editorial",
+    coordinates: { lat: -7.821384, lng: 110.364856 },
   },
   {
     id: "seed-5",
@@ -163,6 +167,7 @@ export const coffeeShops: CoffeeShop[] = [
     wifiFriendly: true,
     featured: true,
     source: "editorial",
+    coordinates: { lat: -7.287667, lng: 112.737826 },
   },
   {
     id: "seed-6",
@@ -187,6 +192,7 @@ export const coffeeShops: CoffeeShop[] = [
     hours: [{ day: "Setiap hari", open: "07.00 - 21.00" }],
     wifiFriendly: true,
     source: "editorial",
+    coordinates: { lat: -7.005145, lng: 110.421866 },
   },
 ];
 

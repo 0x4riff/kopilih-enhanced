@@ -9,10 +9,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
             <Link href="/" className="font-display text-xl tracking-tight text-slate-950 sm:text-2xl">
-              Kopilih Enhanced
+              KOPILIH
             </Link>
             <p className="text-xs text-slate-600 sm:text-sm">
-              Discover, submit, and moderate cafes with a warmer, cleaner browsing flow.
+              Kurasi cafe yang terasa tepat, dekat, dan layak dikunjungi lagi.
             </p>
           </div>
 

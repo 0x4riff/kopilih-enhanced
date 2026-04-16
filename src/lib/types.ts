@@ -32,6 +32,7 @@ export type CoffeeShop = {
   featured?: boolean;
   wifiFriendly: boolean;
   source?: string;
+  coordinates?: Coordinates;
 };
 
 export type SubmissionStatus = "pending" | "approved" | "rejected";
@@ -57,7 +58,12 @@ export type CoffeeSubmission = {
 
 export type SubmissionInput = Omit<CoffeeSubmission, "id" | "submittedAt" | "status">;
 
-export type ShopSort = "featured" | "rating" | "price-low" | "name";
+export type Coordinates = {
+  lat: number;
+  lng: number;
+};
+
+export type ShopSort = "featured" | "rating" | "price-low" | "name" | "nearest";
 
 export type ShopFilters = {
   query: string;

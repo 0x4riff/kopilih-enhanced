@@ -1,4 +1,4 @@
-import type { CoffeeShop, PriceRange, ShopFilters, SubmissionStatus } from "./types";
+import type { CoffeeShop, Coordinates, PriceRange, ShopFilters, SubmissionStatus } from "./types";
 
 export function formatRelativeDate(iso: string) {
   const date = new Date(iso);
@@ -45,25 +45,45 @@ export function statusTone(status: SubmissionStatus) {
   }
 }
 
-export function filterAndSortShops(shops: CoffeeShop[], filters: ShopFilters) {
+export function calculateDistanceKm(a: Coordinates, b: Coordinates) {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const earthRadiusKm = 6371;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const aa =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
+  return earthRadiusKm * c;
+}
+
+export function formatDistanceKm(distanceKm: number) {
+  if (distanceKm < 1) return `${Math.round(distanceKm * 1000)} m`;
+  return `${distanceKm.toFixed(1)} km`;
+}
+
+export function filterAndSortShops(shops: CoffeeShop[], filters: ShopFilters, userLocation?: Coordinates | null) {
   const query = filters.query.trim().toLowerCase();
 
   const filtered = shops.filter((shop) => {
-    const haystack = [shop.name, shop.city, shop.neighborhood, shop.description, ...shop.vibes]
-      .join(" ")
-      .toLowerCase();
-
+    const haystack = [shop.name, shop.city, shop.neighborhood, shop.description, ...shop.vibes].join(" ").toLowerCase();
     const matchesQuery = !query || haystack.includes(query);
-    const matchesCity = !filters.city || shop.city === filters.city;
-    const matchesVibe = !filters.vibe || shop.vibes.includes(filters.vibe);
+    const matchesCity = !filters.city || filters.city === "all" || shop.city === filters.city;
+    const matchesVibe = !filters.vibe || filters.vibe === "all" || shop.vibes.includes(filters.vibe);
     const matchesWifi = !filters.wifiOnly || shop.wifiFriendly;
-    const matchesPrice = !filters.price || shop.priceRange === filters.price;
+    const matchesPrice = !filters.price || filters.price === "all" || shop.priceRange === filters.price;
 
     return matchesQuery && matchesCity && matchesVibe && matchesWifi && matchesPrice;
   });
 
   return filtered.sort((a, b) => {
     switch (filters.sort) {
+      case "nearest": {
+        if (!userLocation) return Number(Boolean(b.featured)) - Number(Boolean(a.featured)) || b.rating - a.rating;
+        const aDistance = a.coordinates ? calculateDistanceKm(userLocation, a.coordinates) : Number.POSITIVE_INFINITY;
+        const bDistance = b.coordinates ? calculateDistanceKm(userLocation, b.coordinates) : Number.POSITIVE_INFINITY;
+        return aDistance - bDistance;
+      }
       case "rating":
         return b.rating - a.rating;
       case "price-low":
