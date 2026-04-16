@@ -1,10 +1,11 @@
 import Link from "next/link";
 
 import { FavoriteButton } from "@/components/favorite-button";
-import type { CoffeeShop } from "@/lib/types";
-import { formatPriceLabel } from "@/lib/utils";
+import type { CoffeeShop, Coordinates } from "@/lib/types";
+import { calculateDistanceKm, formatDistanceKm, formatPriceLabel } from "@/lib/utils";
 
-export function ShopCard({ shop }: { shop: CoffeeShop }) {
+export function ShopCard({ shop, userLocation }: { shop: CoffeeShop; userLocation?: Coordinates | null }) {
+  const distance = userLocation && shop.coordinates ? calculateDistanceKm(userLocation, shop.coordinates) : null;
   return (
     <article className="overflow-hidden rounded-[30px] border border-white/70 bg-white shadow-[0_25px_70px_-40px_rgba(15,23,42,0.45)]">
       <div
@@ -23,6 +24,11 @@ export function ShopCard({ shop }: { shop: CoffeeShop }) {
           {shop.source === "community" ? (
             <span className="rounded-full bg-teal-500/85 px-3 py-1 text-xs font-semibold text-white">
               Community approved
+            </span>
+          ) : null}
+          {distance !== null ? (
+            <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900">
+              {formatDistanceKm(distance)} away
             </span>
           ) : null}
         </div>
@@ -60,6 +66,11 @@ export function ShopCard({ shop }: { shop: CoffeeShop }) {
           <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-700">
             {formatPriceLabel(shop.priceRange)}
           </span>
+          {distance !== null && distance < 5 ? (
+            <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+              Near you
+            </span>
+          ) : null}
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">

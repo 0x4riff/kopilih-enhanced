@@ -8,7 +8,7 @@ import { defaultFilters, getCityOptions, getFavorites, getVibeOptions } from "@/
 import { getFallbackCoffeeShops, mapCafeRowToCoffeeShop } from "@/lib/supabase-mappers";
 import { getSupabaseBrowserClient, hasSupabaseEnv } from "@/lib/supabase";
 import type { CoffeeShop, Coordinates, ShopFilters } from "@/lib/types";
-import { filterAndSortShops, formatDistanceKm } from "@/lib/utils";
+import { calculateDistanceKm, filterAndSortShops, formatDistanceKm } from "@/lib/utils";
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
@@ -178,7 +178,7 @@ export function HomePageClient() {
             {locationError ? <p className="text-sm text-amber-100">{locationError}</p> : null}
             {nearestShop && userLocation ? (
               <p className="text-sm text-white/80">
-                Nearest right now: <span className="font-semibold text-white">{nearestShop.name}</span> · {formatDistanceKm(Math.hypot((nearestShop.coordinates?.lat ?? 0) - userLocation.lat, (nearestShop.coordinates?.lng ?? 0) - userLocation.lng) * 111)}
+                Nearest right now: <span className="font-semibold text-white">{nearestShop.name}</span> · {nearestShop.coordinates ? formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates)) : "Unknown distance"}
               </p>
             ) : null}
           </div>
@@ -249,7 +249,7 @@ export function HomePageClient() {
             <div className="grid gap-6 xl:grid-cols-2">
               {filteredShops.map((shop) => (
                 <div key={shop.slug}>
-                  <ShopCard shop={shop} />
+                  <ShopCard shop={shop} userLocation={userLocation} />
                 </div>
               ))}
             </div>
@@ -266,6 +266,7 @@ export function HomePageClient() {
               <div className="space-y-2 text-sm text-slate-600">
                 <p>{nearestShop.neighborhood}, {nearestShop.city}</p>
                 <p>{nearestShop.address}</p>
+                {nearestShop.coordinates ? <p>{formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates))} dari titikmu</p> : null}
                 <Link href={`/cafes/${nearestShop.slug}`} className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">
                   Open nearest cafe
                 </Link>
