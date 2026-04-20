@@ -77,17 +77,17 @@ export function SubmitForm() {
     const vibes = form.vibes.split(",").map((item) => item.trim()).filter(Boolean);
 
     if (!form.name.trim() || !form.city.trim() || !form.neighborhood.trim() || !form.address.trim() || !form.description.trim()) {
-      setError("Please fill the core cafe details before submitting.");
+      setError("Lengkapi detail utama cafe sebelum mengirim rekomendasi.");
       return;
     }
 
     if (vibes.length === 0) {
-      setError("Add at least one vibe, separated by commas.");
+      setError("Tambahkan minimal satu vibe, pisahkan dengan koma.");
       return;
     }
 
     if (form.amenities.length === 0) {
-      setError("Select at least one amenity.");
+      setError("Pilih minimal satu fasilitas.");
       return;
     }
 
@@ -146,7 +146,7 @@ export function SubmitForm() {
 
       setForm(initialFormState);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to submit cafe.");
+      setError(err instanceof Error ? err.message : "Rekomendasi cafe belum berhasil dikirim.");
     } finally {
       setSending(false);
     }
@@ -162,18 +162,18 @@ export function SubmitForm() {
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
-              <TextField label="Cafe name" value={form.name} onChange={(value) => setForm((current) => ({ ...current, name: value }))} />
-              <TextField label="City" value={form.city} onChange={(value) => setForm((current) => ({ ...current, city: value }))} />
-              <TextField label="Neighborhood" value={form.neighborhood} onChange={(value) => setForm((current) => ({ ...current, neighborhood: value }))} />
-              <SelectField label="Price range" value={form.priceRange} onChange={(value) => setForm((current) => ({ ...current, priceRange: value as PriceRange }))} options={["$", "$$", "$$$"]} />
+              <TextField label="Nama cafe" value={form.name} onChange={(value) => setForm((current) => ({ ...current, name: value }))} />
+              <TextField label="Kota" value={form.city} onChange={(value) => setForm((current) => ({ ...current, city: value }))} />
+              <TextField label="Area" value={form.neighborhood} onChange={(value) => setForm((current) => ({ ...current, neighborhood: value }))} />
+              <SelectField label="Rentang harga" value={form.priceRange} onChange={(value) => setForm((current) => ({ ...current, priceRange: value as PriceRange }))} options={["$", "$$", "$$$"]} />
             </div>
 
-            <TextField label="Street address" value={form.address} onChange={(value) => setForm((current) => ({ ...current, address: value }))} />
-            <TextAreaField label="Short description" value={form.description} onChange={(value) => setForm((current) => ({ ...current, description: value }))} />
-            <TextField label="Vibes" hint="Separate with commas" value={form.vibes} onChange={(value) => setForm((current) => ({ ...current, vibes: value }))} />
+            <TextField label="Alamat" value={form.address} onChange={(value) => setForm((current) => ({ ...current, address: value }))} />
+            <TextAreaField label="Deskripsi singkat" value={form.description} onChange={(value) => setForm((current) => ({ ...current, description: value }))} />
+            <TextField label="Vibe" hint="Pisahkan dengan koma" value={form.vibes} onChange={(value) => setForm((current) => ({ ...current, vibes: value }))} />
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Amenities</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Fasilitas</p>
               <div className="mt-3 flex flex-wrap gap-3">
                 {amenityOptions.map((amenity) => {
                   const active = form.amenities.includes(amenity);
@@ -192,9 +192,9 @@ export function SubmitForm() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
-              <TextField label="Image URL" hint="Optional" value={form.imageUrl} onChange={(value) => setForm((current) => ({ ...current, imageUrl: value }))} />
-              <TextField label="Google Maps URL" hint="Optional" value={form.mapsUrl} onChange={(value) => setForm((current) => ({ ...current, mapsUrl: value }))} />
-              <TextField label="Instagram URL" hint="Optional" value={form.instagramUrl} onChange={(value) => setForm((current) => ({ ...current, instagramUrl: value }))} />
+              <TextField label="URL gambar" hint="Opsional" value={form.imageUrl} onChange={(value) => setForm((current) => ({ ...current, imageUrl: value }))} />
+              <TextField label="URL Google Maps" hint="Opsional" value={form.mapsUrl} onChange={(value) => setForm((current) => ({ ...current, mapsUrl: value }))} />
+              <TextField label="URL Instagram" hint="Opsional" value={form.instagramUrl} onChange={(value) => setForm((current) => ({ ...current, instagramUrl: value }))} />
             </div>
 
             {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}

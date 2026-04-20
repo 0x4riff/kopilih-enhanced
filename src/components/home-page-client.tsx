@@ -160,13 +160,13 @@ export function HomePageClient() {
                 onClick={handleUseMyLocation}
                 className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-white/70"
               >
-                Gunakan lokasi saya
+Aktifkan lokasi saya
               </button>
               <Link
                 href="/submit"
                 className="inline-flex items-center rounded-full border border-white/35 bg-black/10 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/60"
               >
-                Rekomendasikan cafe
+Kirim rekomendasi cafe
               </Link>
             </div>
 
@@ -199,7 +199,7 @@ export function HomePageClient() {
           <div className="rounded-[32px] border border-white/80 bg-white/90 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.25)] backdrop-blur">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               <label className="space-y-2">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Search</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cari</span>
                 <input
                   value={filters.query}
                   onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))}
@@ -208,10 +208,10 @@ export function HomePageClient() {
                 />
               </label>
 
-              <SelectField label="City" value={filters.city} onChange={(value) => setFilters((current) => ({ ...current, city: value }))} options={["all", ...cityOptions]} />
+              <SelectField label="Kota" value={filters.city} onChange={(value) => setFilters((current) => ({ ...current, city: value }))} options={["all", ...cityOptions]} />
               <SelectField label="Vibe" value={filters.vibe} onChange={(value) => setFilters((current) => ({ ...current, vibe: value }))} options={["all", ...vibeOptions]} />
-              <SelectField label="Price" value={filters.price} onChange={(value) => setFilters((current) => ({ ...current, price: value }))} options={["all", "$", "$$", "$$$"]} />
-              <SelectField label="Sort" value={filters.sort} onChange={(value) => setFilters((current) => ({ ...current, sort: value as typeof current.sort }))} options={["featured", "rating", "price-low", "name", ...(userLocation ? ["nearest"] : [])]} />
+              <SelectField label="Harga" value={filters.price} onChange={(value) => setFilters((current) => ({ ...current, price: value }))} options={["all", "$", "$$", "$$$"]} />
+              <SelectField label="Urutkan" value={filters.sort} onChange={(value) => setFilters((current) => ({ ...current, sort: value as typeof current.sort }))} options={["featured", "rating", "price-low", "name", ...(userLocation ? ["nearest"] : [])]} />
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -223,7 +223,7 @@ export function HomePageClient() {
                     onChange={(event) => setFilters((current) => ({ ...current, wifiOnly: event.target.checked }))}
                     className="size-4 rounded border-slate-300 text-amber-500"
                   />
-                  WiFi first
+Prioritaskan WiFi
                 </label>
                 {userLocation ? (
                   <div className="flex flex-wrap gap-2">

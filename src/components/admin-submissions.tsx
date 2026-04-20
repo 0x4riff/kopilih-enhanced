@@ -70,7 +70,7 @@ export function AdminSubmissions() {
 
       setSubmissions(mapped);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load submissions.");
+      setError(err instanceof Error ? err.message : "Rekomendasi masuk belum berhasil dimuat.");
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,7 @@ export function AdminSubmissions() {
 
       await loadSubmissions();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to review submission.");
+      setError(err instanceof Error ? err.message : "Review rekomendasi belum berhasil disimpan.");
     }
   }
 
@@ -149,9 +149,9 @@ Buka form submit
         </div>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
-          <CountCard label="Pending" value={counts.pending} tone="amber" />
-          <CountCard label="Approved" value={counts.approved} tone="emerald" />
-          <CountCard label="Rejected" value={counts.rejected} tone="rose" />
+          <CountCard label="Menunggu" value={counts.pending} tone="amber" />
+          <CountCard label="Disetujui" value={counts.approved} tone="emerald" />
+          <CountCard label="Ditolak" value={counts.rejected} tone="rose" />
         </div>
       </section>
 
@@ -170,7 +170,7 @@ Buka form submit
                     <h2 className="text-4xl font-semibold leading-none text-slate-950">{submission.name}</h2>
                     <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusTone(submission.status)}`}>{formatStatusLabel(submission.status)}</span>
                   </div>
-                  <p className="mt-2 text-sm text-slate-500">{submission.neighborhood}, {submission.city} • submitted {formatRelativeDate(submission.submittedAt)}</p>
+                  <p className="mt-2 text-sm text-slate-500">{submission.neighborhood}, {submission.city} • dikirim {formatRelativeDate(submission.submittedAt)}</p>
                 </div>
 
                 {submission.status === "approved" ? (
@@ -191,9 +191,9 @@ Lihat halaman publik
                   </div>
 
                   <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-                    <InfoRow label="Address" value={submission.address} />
-                    <InfoRow label="Price" value={submission.priceRange} />
-                    <InfoRow label="Amenities" value={submission.amenities.join(", ")} />
+                    <InfoRow label="Alamat" value={submission.address} />
+                    <InfoRow label="Harga" value={submission.priceRange} />
+                    <InfoRow label="Fasilitas" value={submission.amenities.join(", ")} />
                     <InfoRow label="Slug" value={submission.slug} />
                   </div>
 

@@ -120,7 +120,7 @@ Kembali ke eksplorasi
             <div className="flex flex-wrap gap-3">
               <FavoriteButton slug={shop.slug} />
               <a href={shop.mapsUrl} target="_blank" rel="noreferrer" className="rounded-full border border-white/30 bg-white/12 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60">
-                Open Maps
+Buka peta
               </a>
               <a href={shop.instagramUrl} target="_blank" rel="noreferrer" className="rounded-full border border-white/30 bg-white/12 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60">
                 Instagram
@@ -132,10 +132,10 @@ Kembali ke eksplorasi
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/65">Ringkasan</p>
             <dl className="mt-5 space-y-4 text-sm text-white/85">
               <DetailRow label="Rating" value={`${shop.rating.toFixed(1)} / 5`} />
-              <DetailRow label="Reviews" value={`${shop.reviewCount} ulasan publik`} />
-              <DetailRow label="Price" value={formatPriceLabel(shop.priceRange)} />
+              <DetailRow label="Ulasan" value={`${shop.reviewCount} ulasan publik`} />
+              <DetailRow label="Harga" value={formatPriceLabel(shop.priceRange)} />
               <DetailRow label="WiFi" value={shop.wifiFriendly ? "Siap untuk kerja fokus" : "Nyaman untuk singgah santai"} />
-              <DetailRow label="Address" value={shop.address} />
+              <DetailRow label="Alamat" value={shop.address} />
             </dl>
           </div>
         </div>
