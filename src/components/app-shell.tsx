@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { StoreStatus } from "@/components/store-status";
@@ -8,10 +9,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-30 border-b border-white/60 bg-[#fff8ef]/85 shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div>
-            <Link href="/" className="font-display text-xl tracking-tight text-slate-950 sm:text-2xl">
-              KOPILIH
+            <Link href="/" className="inline-flex items-center gap-3">
+              <Image src="/kopilih-logo.svg" alt="KOPILIH" width={148} height={38} className="h-9 w-auto" priority />
             </Link>
-            <p className="text-xs text-slate-600 sm:text-sm">
+            <p className="mt-2 text-xs text-slate-600 sm:text-sm">
 Panduan cafe untuk kerja fokus, rapat santai, dan singgah yang terasa tepat.
             </p>
           </div>
