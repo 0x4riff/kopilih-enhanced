@@ -19,8 +19,8 @@ export function FavoriteButton({ slug }: { slug: string }) {
 
   if (!mounted) {
     return (
-      <span className="inline-flex items-center rounded-full border border-white/80 bg-white px-3 py-2 text-sm font-semibold text-slate-950 shadow-sm">
-        Save
+      <span className="btn btn-secondary">
+        Simpan
       </span>
     );
   }
@@ -29,15 +29,11 @@ export function FavoriteButton({ slug }: { slug: string }) {
     <button
       type="button"
       onClick={handleClick}
-      className={`inline-flex items-center rounded-full border px-3 py-2 text-sm font-semibold transition ${
-        active
-          ? "border-amber-500 bg-amber-500 text-white shadow-sm"
-          : "border-white/80 bg-white text-slate-950 shadow-sm hover:bg-amber-50"
-      }`}
+      className={`btn ${active ? "btn-primary" : "btn-secondary"}`}
       aria-pressed={active}
-      aria-label={active ? "Remove from favorites" : "Save to favorites"}
+      aria-label={active ? "Hapus dari simpanan" : "Simpan cafe"}
     >
-      {active ? "Saved" : "Save"}
+      {active ? "Tersimpan" : "Simpan"}
     </button>
   );
 }

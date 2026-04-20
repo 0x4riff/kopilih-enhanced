@@ -79,7 +79,7 @@ Dekat darimu
           </span>
           <Link
             href={`/cafes/${shop.slug}`}
-            className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+            className="btn btn-primary !min-h-0 px-4 py-2.5"
           >
 Lihat detail
           </Link>

@@ -158,13 +158,13 @@ export function HomePageClient() {
               <button
                 type="button"
                 onClick={handleUseMyLocation}
-                className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-white/70"
+                className="btn btn-secondary px-6"
               >
 Aktifkan lokasi saya
               </button>
               <Link
                 href="/submit"
-                className="inline-flex items-center rounded-full border border-white/35 bg-black/10 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/60"
+                className="btn btn-ghost px-6"
               >
 Kirim rekomendasi cafe
               </Link>
@@ -232,7 +232,7 @@ Prioritaskan WiFi
                         key={radius}
                         type="button"
                         onClick={() => setDistanceRadiusKm((current) => (current === radius ? null : radius))}
-                        className={`rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition ${distanceRadiusKm === radius ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-white text-slate-900 hover:bg-slate-50"}`}
+                        className={`chip ${distanceRadiusKm === radius ? "chip-active" : ""}`}
                       >
                         Dalam {radius} km
                       </button>
@@ -247,7 +247,7 @@ Prioritaskan WiFi
                   setFilters({ ...defaultFilters, sort: userLocation ? "nearest" : "featured" });
                   setDistanceRadiusKm(null);
                 }}
-                className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                className="btn btn-secondary !min-h-0 px-4 py-2.5"
               >
                 Reset filters
               </button>
@@ -287,10 +287,10 @@ Prioritaskan WiFi
                 <p>{nearestShop.address}</p>
                 {nearestShop.coordinates ? <p>{formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates))} dari titikmu</p> : null}
                 <div className="flex flex-wrap gap-3">
-                  <Link href={`/cafes/${nearestShop.slug}`} className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">
+                  <Link href={`/cafes/${nearestShop.slug}`} className="btn btn-primary !min-h-0 px-4 py-2.5">
                     Lihat cafe
                   </Link>
-                  <a href={nearestShop.mapsUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm">
+                  <a href={nearestShop.mapsUrl} target="_blank" rel="noreferrer" className="btn btn-secondary !min-h-0 px-4 py-2.5">
                     Buka rute
                   </a>
                 </div>

@@ -143,7 +143,7 @@ export function AdminSubmissions() {
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-500">Gunakan halaman ini untuk menjaga kualitas katalog, melengkapi catatan internal, lalu menerbitkan listing yang layak tayang.</p>
           </div>
 
-          <Link href="/submit" className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300">
+          <Link href="/submit" className="btn btn-secondary px-5">
 Buka form submit
           </Link>
         </div>
@@ -174,7 +174,7 @@ Buka form submit
                 </div>
 
                 {submission.status === "approved" ? (
-                  <Link href={`/cafes/${submission.slug}`} className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">
+                  <Link href={`/cafes/${submission.slug}`} className="btn btn-primary !min-h-0 px-4 py-2.5">
 Lihat halaman publik
                   </Link>
                 ) : null}
@@ -199,20 +199,20 @@ Lihat halaman publik
 
                   <label className="block">
                     <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Catatan internal</span>
-                    <textarea value={note} onChange={(event) => setNotes((current) => ({ ...current, [submission.id]: event.target.value }))} rows={3} className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400" />
+                    <textarea value={note} onChange={(event) => setNotes((current) => ({ ...current, [submission.id]: event.target.value }))} rows={3} className="mt-2 w-full rounded-[22px] border border-slate-200/90 bg-white/88 px-4 py-3.5 text-sm text-slate-900 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.35)] outline-none backdrop-blur transition focus:border-slate-400 focus:bg-white focus:shadow-[0_18px_38px_-28px_rgba(15,23,42,0.4)]" />
                   </label>
                 </div>
 
                 <div className="rounded-[28px] bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tindakan</p>
                   <div className="mt-4 grid gap-3">
-                    <button type="button" onClick={() => reviewSubmission(submission, "approved", note.trim() || undefined)} className="rounded-full bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300">
+                    <button type="button" onClick={() => reviewSubmission(submission, "approved", note.trim() || undefined)} className="btn btn-primary w-full justify-center px-4">
 Setujui dan terbitkan
                     </button>
-                    <button type="button" onClick={() => reviewSubmission(submission, "rejected", note.trim() || undefined)} className="rounded-full bg-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-300">
+                    <button type="button" onClick={() => reviewSubmission(submission, "rejected", note.trim() || undefined)} className="btn w-full justify-center border border-rose-200 bg-rose-50 text-rose-700 shadow-[0_10px_24px_-18px_rgba(225,29,72,0.35)] hover:border-rose-300 hover:bg-rose-100">
 Tolak rekomendasi
                     </button>
-                    <button type="button" onClick={() => reviewSubmission(submission, "pending", note.trim() || undefined)} className="rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300">
+                    <button type="button" onClick={() => reviewSubmission(submission, "pending", note.trim() || undefined)} className="btn btn-secondary w-full justify-center px-4">
 Kembalikan ke review
                     </button>
                   </div>

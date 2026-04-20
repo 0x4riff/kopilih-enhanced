@@ -19,13 +19,13 @@ Panduan cafe untuk kerja fokus, rapat santai, dan singgah yang terasa tepat.
           <div className="flex flex-wrap items-center gap-3">
             <StoreStatus />
             <nav className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-700">
-              <Link href="/" className="rounded-full px-3 py-2 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300">
+              <Link href="/" className="btn btn-secondary !min-h-0 px-4 py-2.5">
 Jelajahi
               </Link>
-              <Link href="/submit" className="rounded-full px-3 py-2 transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-slate-300">
+              <Link href="/submit" className="btn btn-secondary !min-h-0 px-4 py-2.5">
 Kirim cafe
               </Link>
-              <Link href="/admin/submissions" className="rounded-full bg-slate-950 px-4 py-2 text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">
+              <Link href="/admin/submissions" className="btn btn-primary !min-h-0 px-4 py-2.5">
 Review
               </Link>
             </nav>

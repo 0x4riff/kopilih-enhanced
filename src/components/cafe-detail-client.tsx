@@ -79,8 +79,8 @@ export function CafeDetailClient({ slug }: { slug: string }) {
             Listing ini mungkin belum tayang, dipindahkan, atau sedang tidak tersedia untuk publik.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm">Kembali ke katalog</Link>
-            <Link href="/submit" className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm">Rekomendasikan cafe</Link>
+            <Link href="/" className="btn btn-primary px-5">Kembali ke katalog</Link>
+            <Link href="/submit" className="btn btn-secondary px-5">Rekomendasikan cafe</Link>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@ export function CafeDetailClient({ slug }: { slug: string }) {
       >
         <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
           <div className="space-y-6">
-            <Link href="/" className="inline-flex rounded-full border border-white/30 bg-white/12 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60">
+            <Link href="/" className="btn btn-ghost !min-h-0 px-4 py-2.5">
 Kembali ke eksplorasi
             </Link>
 
@@ -119,10 +119,10 @@ Kembali ke eksplorasi
 
             <div className="flex flex-wrap gap-3">
               <FavoriteButton slug={shop.slug} />
-              <a href={shop.mapsUrl} target="_blank" rel="noreferrer" className="rounded-full border border-white/30 bg-white/12 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60">
+              <a href={shop.mapsUrl} target="_blank" rel="noreferrer" className="btn btn-ghost !min-h-0 px-4 py-2.5">
 Buka peta
               </a>
-              <a href={shop.instagramUrl} target="_blank" rel="noreferrer" className="rounded-full border border-white/30 bg-white/12 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60">
+              <a href={shop.instagramUrl} target="_blank" rel="noreferrer" className="btn btn-ghost !min-h-0 px-4 py-2.5">
                 Instagram
               </a>
             </div>

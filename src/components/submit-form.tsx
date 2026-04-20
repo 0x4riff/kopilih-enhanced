@@ -28,7 +28,7 @@ function TextField({ hint, label, onChange, value }: { hint?: string; label: str
       <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
         {label} {hint ? <span className="normal-case tracking-normal text-slate-400">{hint}</span> : null}
       </span>
-      <input value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400" />
+      <input value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-[22px] border border-slate-200/90 bg-white/88 px-4 py-3.5 text-sm text-slate-900 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.35)] outline-none backdrop-blur transition focus:border-slate-400 focus:bg-white focus:shadow-[0_18px_38px_-28px_rgba(15,23,42,0.4)]" />
     </label>
   );
 }
@@ -37,7 +37,7 @@ function TextAreaField({ label, onChange, value }: { label: string; onChange: (v
   return (
     <label className="block">
       <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</span>
-      <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={5} className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400" />
+      <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={5} className="mt-2 w-full rounded-[22px] border border-slate-200/90 bg-white/88 px-4 py-3.5 text-sm text-slate-900 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.35)] outline-none backdrop-blur transition focus:border-slate-400 focus:bg-white focus:shadow-[0_18px_38px_-28px_rgba(15,23,42,0.4)]" />
     </label>
   );
 }
@@ -46,7 +46,7 @@ function SelectField({ label, onChange, options, value }: { label: string; onCha
   return (
     <label className="block">
       <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400">
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-[22px] border border-slate-200/90 bg-white/88 px-4 py-3.5 text-sm text-slate-900 shadow-[0_12px_30px_-24px_rgba(15,23,42,0.35)] outline-none backdrop-blur transition focus:border-slate-400 focus:bg-white focus:shadow-[0_18px_38px_-28px_rgba(15,23,42,0.4)]">
         {options.map((option) => (
           <option key={option} value={option}>{option}</option>
         ))}
@@ -182,7 +182,7 @@ export function SubmitForm() {
                       key={amenity}
                       type="button"
                       onClick={() => setForm((current) => ({ ...current, amenities: active ? current.amenities.filter((item) => item !== amenity) : [...current.amenities, amenity] }))}
-                      className={`rounded-full border px-4 py-2 text-sm font-semibold shadow-sm transition ${active ? "border-amber-500 bg-amber-500 text-white" : "border-slate-300 bg-white text-slate-900 hover:border-amber-300 hover:bg-amber-50"}`}
+                      className={`chip ${active ? "chip-active" : ""}`}
                     >
                       {amenity}
                     </button>
@@ -200,10 +200,10 @@ export function SubmitForm() {
             {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
 
             <div className="flex flex-wrap items-center gap-3">
-              <button type="submit" disabled={sending} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60">
+              <button type="submit" disabled={sending} className="btn btn-primary px-5">
                 {sending ? "Mengirim..." : "Kirim rekomendasi"}
               </button>
-              <Link href="/admin/submissions" className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300">
+              <Link href="/admin/submissions" className="btn btn-secondary px-5">
 Buka meja review
               </Link>
             </div>
@@ -220,8 +220,8 @@ Buka meja review
               <h2 className="mt-2 text-3xl font-semibold leading-none text-slate-950">{submitted.name}</h2>
               <p className="mt-4 text-sm leading-6 text-slate-600">Status saat ini: {formatStatusLabel(submitted.status)}. Selanjutnya listing akan masuk tahap review sebelum tayang.</p>
               <div className="mt-5 flex gap-3">
-                <Link href="/admin/submissions" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">Lihat meja review</Link>
-                <Link href="/" className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm">Kembali ke beranda</Link>
+                <Link href="/admin/submissions" className="btn btn-primary !min-h-0 px-4 py-2.5">Lihat meja review</Link>
+                <Link href="/" className="btn btn-secondary !min-h-0 px-4 py-2.5">Kembali ke beranda</Link>
               </div>
             </section>
           ) : null}
