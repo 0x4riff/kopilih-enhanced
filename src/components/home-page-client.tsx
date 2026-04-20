@@ -145,11 +145,11 @@ export function HomePageClient() {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_300px] lg:items-end">
           <div className="space-y-7">
             <div className="space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.34em] text-amber-200">KOPILIH</p>
-              <h1 className="max-w-3xl text-5xl font-semibold leading-[0.96] text-white sm:text-6xl lg:text-7xl">
+              <p className="editorial-kicker text-amber-200">KOPILIH</p>
+              <h1 className="editorial-title max-w-3xl text-5xl font-semibold text-white sm:text-6xl lg:text-7xl">
                 Temukan cafe yang terasa pas, dekat, dan layak kamu datangi lagi.
               </h1>
-              <p className="max-w-2xl text-base leading-8 text-white/78 sm:text-lg">
+              <p className="editorial-body max-w-2xl text-base text-white/78 sm:text-lg">
                 Pilihan cafe untuk kerja, rapat santai, deep focus, atau sekadar menikmati ruang dengan rasa yang tepat.
               </p>
             </div>
@@ -171,9 +171,9 @@ Kirim rekomendasi cafe
             </div>
 
             <div className="flex flex-wrap gap-3 text-sm text-white/70">
-              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Kurasi kota-kota utama</span>
-              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Nearby browsing</span>
-              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Pilihan personal</span>
+              <span className="stat-tile rounded-full px-4 py-2">Kurasi kota-kota utama</span>
+              <span className="stat-tile rounded-full px-4 py-2">Nearby browsing</span>
+              <span className="stat-tile rounded-full px-4 py-2">Pilihan personal</span>
             </div>
 
             {locationError ? <p className="text-sm text-amber-100">{locationError}</p> : null}
@@ -257,9 +257,9 @@ Prioritaskan WiFi
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Pilihan saat ini</p>
-              <h2 className="text-4xl font-semibold leading-none text-slate-950">{filteredShops.length} cafe siap dilihat</h2>
+              <h2 className="editorial-title text-4xl font-semibold text-slate-950">{filteredShops.length} cafe siap dilihat</h2>
             </div>
-            <p className="max-w-md text-sm leading-6 text-slate-600">
+            <p className="editorial-body max-w-md text-sm text-slate-600">
               Mulai dari pilihan unggulan, lalu sempitkan berdasarkan vibe, harga, atau radius dari titikmu sekarang.
             </p>
           </div>

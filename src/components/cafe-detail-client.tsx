@@ -112,8 +112,8 @@ Kembali ke eksplorasi
                 ) : null}
               </div>
               <div>
-                <h1 className="font-display text-5xl leading-none sm:text-6xl">{shop.name}</h1>
-                <p className="mt-3 max-w-2xl text-lg leading-8 text-white/85">{shop.longDescription}</p>
+                <h1 className="font-display editorial-title text-5xl sm:text-6xl">{shop.name}</h1>
+                <p className="editorial-body mt-3 max-w-2xl text-lg text-white/85">{shop.longDescription}</p>
               </div>
             </div>
 
@@ -143,7 +143,7 @@ Buka peta
 
       <section className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-8">
-          <section className="rounded-[32px] border border-white/70 bg-white/85 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+          <section className="surface-card rounded-[32px] p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Vibes</p>
             <div className="mt-4 flex flex-wrap gap-2">
               {shop.vibes.map((vibe) => (
@@ -158,11 +158,11 @@ Buka peta
             </div>
           </section>
 
-          <section className="rounded-[32px] border border-white/70 bg-white/85 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+          <section className="surface-card rounded-[32px] p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Opening hours</p>
             <div className="mt-4 grid gap-3">
               {shop.hours.map((row) => (
-                <div key={row.day} className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 shadow-sm">
+                <div key={row.day} className="surface-muted flex items-center justify-between rounded-[22px] px-4 py-3 text-sm text-slate-800">
                   <span className="font-semibold">{row.day}</span>
                   <span>{row.open}</span>
                 </div>
@@ -172,13 +172,13 @@ Buka peta
         </div>
 
         <aside className="space-y-5">
-          <section className="rounded-[32px] border border-white/70 bg-white/85 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
+          <section className="surface-card rounded-[32px] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Sekitar kota ini</p>
             <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">Pilihan lain di {shop.city}</h2>
             <div className="mt-4 space-y-3">
               {related.length > 0 ? (
                 related.map((candidate) => (
-                  <Link key={candidate.slug} href={`/cafes/${candidate.slug}`} className="block rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm transition hover:border-amber-300 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-200">
+                  <Link key={candidate.slug} href={`/cafes/${candidate.slug}`} className="surface-muted block rounded-[24px] px-4 py-3.5 transition hover:border-slate-300 hover:bg-white/95 focus:outline-none">
                     <div className="text-sm font-semibold text-slate-900">{candidate.name}</div>
                     <div className="text-xs text-slate-500">{candidate.neighborhood}</div>
                   </Link>
@@ -190,7 +190,7 @@ Buka peta
           </section>
 
           {shop.source === "community" ? (
-            <section className="rounded-[32px] border border-teal-200 bg-teal-50 p-5 shadow-sm">
+            <section className="rounded-[32px] border border-teal-200/70 bg-[linear-gradient(180deg,rgba(240,253,250,0.96),rgba(204,251,241,0.72))] p-5 shadow-[0_22px_50px_-36px_rgba(13,148,136,0.35)]">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">Catatan kurasi</p>
               <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">Masuk lewat rekomendasi komunitas</h2>
               <p className="mt-4 text-sm leading-6 text-slate-700">Cafe ini direkomendasikan pengguna lalu dipilih masuk ke katalog setelah proses review.</p>
