@@ -15,13 +15,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-30 border-b border-white/60 bg-[#fff8ef]/85 shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)] backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
             <div>
-              <Link href="/" className="inline-flex items-baseline gap-3">
-                <span className="font-display text-[1.9rem] font-semibold tracking-[-0.06em] text-slate-950 sm:text-[2.1rem]">
-                  KOPILIH
-                </span>
-                <span className="hidden text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400 sm:inline-block">
-                  curated cafe guide
-                </span>
+              <Link href="/" className="inline-flex items-center gap-3">
+                <img src="/kopilih-logo.svg" alt="KOPILIH" className="h-10 w-auto" />
               </Link>
               <p className="mt-2 text-xs text-slate-600 sm:text-sm">
                 Panduan cafe untuk kerja fokus, rapat santai, dan singgah yang terasa tepat.
