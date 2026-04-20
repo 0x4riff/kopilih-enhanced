@@ -146,11 +146,11 @@ export function HomePageClient() {
           <div className="space-y-7">
             <div className="space-y-4">
               <p className="editorial-kicker text-amber-200">KOPILIH</p>
-              <h1 className="editorial-title max-w-3xl text-5xl font-semibold text-white sm:text-6xl lg:text-7xl">
-                Temukan cafe yang terasa pas, dekat, dan layak kamu datangi lagi.
+              <h1 className="editorial-title max-w-4xl text-5xl font-semibold text-white sm:text-6xl lg:text-7xl">
+                Dari kerja fokus sampai singgah santai, temukan cafe yang terasa tepat dan ingin kamu datangi lagi.
               </h1>
               <p className="editorial-body max-w-2xl text-base text-white/78 sm:text-lg">
-                Pilihan cafe untuk kerja, rapat santai, deep focus, atau sekadar menikmati ruang dengan rasa yang tepat.
+                KOPILIH merangkum tempat dengan rasa ruang yang kuat, jarak yang masuk akal, dan karakter yang terasa sejak kunjungan pertama.
               </p>
             </div>
 
@@ -178,9 +178,9 @@ Kirim rekomendasi cafe
 
             {locationError ? <p className="text-sm text-amber-100">{locationError}</p> : null}
             {nearestShop && userLocation ? (
-              <p className="text-sm text-white/80">
-                Yang paling dekat sekarang: <span className="font-semibold text-white">{nearestShop.name}</span>
-                {nearestShop.coordinates ? ` · ${formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates))}` : ""}
+              <p className="editorial-body max-w-xl text-sm text-white/80">
+                Pilihan paling dekat saat ini adalah <span className="font-semibold text-white">{nearestShop.name}</span>
+                {nearestShop.coordinates ? `, sekitar ${formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates))} dari titikmu.` : "."}
               </p>
             ) : null}
           </div>
@@ -257,7 +257,7 @@ Prioritaskan WiFi
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Pilihan saat ini</p>
-              <h2 className="editorial-title text-4xl font-semibold text-slate-950">{filteredShops.length} cafe siap dilihat</h2>
+              <h2 className="editorial-title text-4xl font-semibold text-slate-950">{filteredShops.length} cafe siap dipertimbangkan</h2>
             </div>
             <p className="editorial-body max-w-md text-sm text-slate-600">
               Mulai dari pilihan unggulan, lalu sempitkan berdasarkan vibe, harga, atau radius dari titikmu sekarang.
@@ -274,7 +274,9 @@ Prioritaskan WiFi
             </div>
           ) : (
             <div className="surface-card rounded-[30px] border-dashed border-slate-300 p-8 text-center text-slate-500">
-              Belum ada cafe yang cocok dengan kombinasi filter ini. Coba longgarkan radius, vibe, atau harga.
+              <p className="editorial-kicker text-slate-400">Belum ketemu yang pas</p>
+              <h3 className="mt-3 text-3xl font-semibold text-slate-950">Coba longgarkan filter, lalu lihat pilihan yang muncul.</h3>
+              <p className="editorial-body mx-auto mt-3 max-w-md text-sm text-slate-500">Kadang radius terlalu sempit, vibe terlalu spesifik, atau harga terlalu ketat untuk area yang sedang kamu lihat.</p>
             </div>
           )}
         </div>
@@ -296,7 +298,7 @@ Prioritaskan WiFi
                 </div>
               </div>
             ) : (
-              <p className="text-sm leading-6 text-slate-500">Aktifkan lokasi untuk melihat pilihan yang paling dekat dari titikmu sekarang.</p>
+              <p className="editorial-body text-sm text-slate-500">Aktifkan lokasi untuk melihat cafe yang paling relevan dengan jarak tempuhmu saat ini.</p>
             )}
           </SidebarCard>
 
@@ -311,7 +313,7 @@ Prioritaskan WiFi
                 ))}
               </div>
             ) : (
-              <p className="text-sm leading-6 text-slate-500">Gunakan tombol Save di card cafe untuk membuat shortlist personal.</p>
+              <p className="editorial-body text-sm text-slate-500">Gunakan tombol Simpan di tiap card untuk membangun shortlist cafe yang ingin kamu kunjungi lagi.</p>
             )}
           </SidebarCard>
         </aside>

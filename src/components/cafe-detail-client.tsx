@@ -64,7 +64,7 @@ export function CafeDetailClient({ slug }: { slug: string }) {
   if (loading) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="h-[420px] animate-pulse rounded-[36px] bg-white/60" />
+        <div className="surface-card h-[420px] animate-pulse rounded-[36px]" />
       </div>
     );
   }
@@ -72,11 +72,11 @@ export function CafeDetailClient({ slug }: { slug: string }) {
   if (!shop) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-14 text-center sm:px-6 lg:px-8">
-        <div className="rounded-[36px] border border-dashed border-slate-300 bg-white/70 p-10 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)]">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Listing unavailable</p>
-          <h1 className="mt-3 font-display text-5xl text-slate-950">Cafe belum tersedia.</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-500">
-            Listing ini mungkin belum tayang, dipindahkan, atau sedang tidak tersedia untuk publik.
+        <div className="surface-card rounded-[36px] border-dashed border-slate-300 p-10">
+          <p className="editorial-kicker text-slate-400">Listing belum tersedia</p>
+          <h1 className="mt-3 font-display text-5xl text-slate-950">Cafe ini belum bisa ditampilkan.</h1>
+          <p className="editorial-body mx-auto mt-4 max-w-2xl text-base text-slate-500">
+            Bisa jadi listing belum tayang, sedang dipindahkan, atau untuk sementara tidak tersedia di katalog publik.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href="/" className="btn btn-primary px-5">Kembali ke katalog</Link>
@@ -193,7 +193,7 @@ Buka peta
             <section className="rounded-[32px] border border-teal-200/70 bg-[linear-gradient(180deg,rgba(240,253,250,0.96),rgba(204,251,241,0.72))] p-5 shadow-[0_22px_50px_-36px_rgba(13,148,136,0.35)]">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">Catatan kurasi</p>
               <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">Masuk lewat rekomendasi komunitas</h2>
-              <p className="mt-4 text-sm leading-6 text-slate-700">Cafe ini direkomendasikan pengguna lalu dipilih masuk ke katalog setelah proses review.</p>
+              <p className="editorial-body mt-4 text-sm text-slate-700">Cafe ini masuk lewat rekomendasi pengguna, lalu dipilih setelah melewati proses review internal agar kualitas katalog tetap terjaga.</p>
             </section>
           ) : null}
         </aside>
