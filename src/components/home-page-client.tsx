@@ -33,15 +33,15 @@ function SelectField({ label, onChange, options, value }: { label: string; onCha
             {option === "all"
               ? `All ${label.toLowerCase()}s`
               : option === "featured"
-                ? "Featured first"
+                ? "Pilihan utama"
                 : option === "rating"
-                  ? "Top rating"
+                  ? "Rating tertinggi"
                   : option === "price-low"
-                    ? "Lowest price"
+                    ? "Harga terendah"
                     : option === "name"
-                      ? "Alphabetical"
+                      ? "A-Z"
                       : option === "nearest"
-                        ? "Nearest to you"
+                        ? "Terdekat dari kamu"
                         : option}
           </option>
         ))}
@@ -63,8 +63,6 @@ function SidebarCard({ children, eyebrow, title }: { children: React.ReactNode; 
 export function HomePageClient() {
   const [publicShops, setPublicShops] = useState<CoffeeShop[]>(getFallbackCoffeeShops());
   const [favorites, setFavorites] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [usingSupabase, setUsingSupabase] = useState(false);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [locationError, setLocationError] = useState("");
   const [distanceRadiusKm, setDistanceRadiusKm] = useState<number | null>(null);
@@ -87,7 +85,6 @@ export function HomePageClient() {
       try {
         if (!hasSupabaseEnv()) {
           setPublicShops(getFallbackCoffeeShops());
-          setUsingSupabase(false);
           return;
         }
 
@@ -100,20 +97,9 @@ export function HomePageClient() {
           .order("rating", { ascending: false });
 
         if (error) throw error;
-
-        if (data?.length) {
-          setPublicShops(data.map(mapCafeRowToCoffeeShop));
-          setUsingSupabase(true);
-        } else {
-          setPublicShops(getFallbackCoffeeShops());
-          setUsingSupabase(false);
-        }
-      } catch (error) {
-        console.error("Failed to load cafes", error);
+        if (data?.length) setPublicShops(data.map(mapCafeRowToCoffeeShop));
+      } catch {
         setPublicShops(getFallbackCoffeeShops());
-        setUsingSupabase(false);
-      } finally {
-        setLoading(false);
       }
     }
 
@@ -129,7 +115,6 @@ export function HomePageClient() {
     return sorted.filter((shop) => shop.coordinates && calculateDistanceKm(userLocation, shop.coordinates) <= distanceRadiusKm);
   }, [publicShops, effectiveFilters, userLocation, distanceRadiusKm]);
   const favoriteShops = useMemo(() => publicShops.filter((shop) => favorites.includes(shop.slug)), [publicShops, favorites]);
-  const communityShops = useMemo(() => publicShops.filter((shop) => shop.source === "community"), [publicShops]);
   const nearestShop = useMemo(() => {
     if (!userLocation) return null;
     return filterAndSortShops(publicShops, { ...defaultFilters, sort: "nearest" }, userLocation)[0] ?? null;
@@ -137,7 +122,7 @@ export function HomePageClient() {
 
   function handleUseMyLocation() {
     if (!navigator.geolocation) {
-      setLocationError("Browser ini belum support geolocation.");
+      setLocationError("Browser ini belum mendukung akses lokasi.");
       return;
     }
 
@@ -162,10 +147,10 @@ export function HomePageClient() {
             <div className="space-y-4">
               <p className="text-xs font-semibold uppercase tracking-[0.34em] text-amber-200">KOPILIH</p>
               <h1 className="max-w-3xl text-5xl font-semibold leading-[0.96] text-white sm:text-6xl lg:text-7xl">
-                Temukan cafe terbaik yang paling pas, dan paling dekat.
+                Temukan cafe yang terasa pas, dekat, dan layak kamu datangi lagi.
               </h1>
               <p className="max-w-2xl text-base leading-8 text-white/78 sm:text-lg">
-                Kurasi cafe Indonesia untuk kerja, meeting santai, deep focus, atau sekadar menikmati suasana, sekarang dengan mode lokasi terdekat.
+                Pilihan cafe untuk kerja, rapat santai, deep focus, atau sekadar menikmati ruang dengan rasa yang tepat.
               </p>
             </div>
 
@@ -175,35 +160,36 @@ export function HomePageClient() {
                 onClick={handleUseMyLocation}
                 className="inline-flex items-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-950 shadow-sm transition hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-white/70"
               >
-                Use my location
+                Gunakan lokasi saya
               </button>
               <Link
                 href="/submit"
                 className="inline-flex items-center rounded-full border border-white/35 bg-black/10 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-white/60"
               >
-                Submit a new cafe
+                Rekomendasikan cafe
               </Link>
             </div>
 
             <div className="flex flex-wrap gap-3 text-sm text-white/70">
-              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Near me sorting</span>
-              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Distance badges</span>
-              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Community submissions</span>
+              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Kurasi kota-kota utama</span>
+              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Nearby browsing</span>
+              <span className="rounded-full border border-white/15 bg-white/8 px-4 py-2">Pilihan personal</span>
             </div>
 
             {locationError ? <p className="text-sm text-amber-100">{locationError}</p> : null}
             {nearestShop && userLocation ? (
               <p className="text-sm text-white/80">
-                Nearest right now: <span className="font-semibold text-white">{nearestShop.name}</span> · {nearestShop.coordinates ? formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates)) : "Unknown distance"}
+                Yang paling dekat sekarang: <span className="font-semibold text-white">{nearestShop.name}</span>
+                {nearestShop.coordinates ? ` · ${formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates))}` : ""}
               </p>
             ) : null}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <StatCard label="Public cafes" value={String(publicShops.length)} />
-            <StatCard label="Community picks" value={String(communityShops.length)} />
-            <StatCard label="Saved by you" value={String(favoriteShops.length)} />
-            <StatCard label={loading ? "Loading source" : usingSupabase ? "Live source" : "Fallback source"} value={loading ? "..." : usingSupabase ? "SUPABASE" : "CURATED"} />
+            <StatCard label="Cafe pilihan" value={String(publicShops.length)} />
+            <StatCard label="Disimpan" value={String(favoriteShops.length)} />
+            <StatCard label="Kota aktif" value={String(cityOptions.length)} />
+            <StatCard label="Paling dekat" value={nearestShop ? nearestShop.city : "-"} />
           </div>
         </div>
       </section>
@@ -217,7 +203,7 @@ export function HomePageClient() {
                 <input
                   value={filters.query}
                   onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))}
-                  placeholder="Cafe, city, vibe"
+                  placeholder="Nama cafe, kota, atau vibe"
                   className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
                 />
               </label>
@@ -231,13 +217,13 @@ export function HomePageClient() {
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-3">
                 <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-800">
-                <input
-                  type="checkbox"
-                  checked={filters.wifiOnly}
-                  onChange={(event) => setFilters((current) => ({ ...current, wifiOnly: event.target.checked }))}
-                  className="size-4 rounded border-slate-300 text-amber-500"
-                />
-                WiFi first
+                  <input
+                    type="checkbox"
+                    checked={filters.wifiOnly}
+                    onChange={(event) => setFilters((current) => ({ ...current, wifiOnly: event.target.checked }))}
+                    className="size-4 rounded border-slate-300 text-amber-500"
+                  />
+                  WiFi first
                 </label>
                 {userLocation ? (
                   <div className="flex flex-wrap gap-2">
@@ -248,7 +234,7 @@ export function HomePageClient() {
                         onClick={() => setDistanceRadiusKm((current) => (current === radius ? null : radius))}
                         className={`rounded-full border px-3 py-2 text-sm font-semibold shadow-sm transition ${distanceRadiusKm === radius ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-white text-slate-900 hover:bg-slate-50"}`}
                       >
-                        Within {radius} km
+                        Dalam {radius} km
                       </button>
                     ))}
                   </div>
@@ -270,13 +256,11 @@ export function HomePageClient() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Approved listing</p>
-              <h2 className="text-4xl font-semibold leading-none text-slate-950">{filteredShops.length} cafes ready to browse</h2>
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">Pilihan saat ini</p>
+              <h2 className="text-4xl font-semibold leading-none text-slate-950">{filteredShops.length} cafe siap dilihat</h2>
             </div>
             <p className="max-w-md text-sm leading-6 text-slate-600">
-              {usingSupabase
-                ? "Data sekarang diambil dari katalog live Supabase. Sorting nearest aktif saat izin lokasi diberikan."
-                : "Saat koneksi live belum terbaca, halaman tetap menampilkan katalog kurasi agar pengalaman browsing tidak kosong."}
+              Mulai dari pilihan unggulan, lalu sempitkan berdasarkan vibe, harga, atau radius dari titikmu sekarang.
             </p>
           </div>
 
@@ -290,13 +274,13 @@ export function HomePageClient() {
             </div>
           ) : (
             <div className="rounded-[30px] border border-dashed border-slate-300 bg-white/70 p-8 text-center text-slate-500">
-              No cafes match this filter set. Try widening the city, vibe, or price filters.
+              Belum ada cafe yang cocok dengan kombinasi filter ini. Coba longgarkan radius, vibe, atau harga.
             </div>
           )}
         </div>
 
         <aside className="space-y-5">
-          <SidebarCard eyebrow="Nearest to you" title={nearestShop ? nearestShop.name : "Location not active"}>
+          <SidebarCard eyebrow="Terdekat darimu" title={nearestShop ? nearestShop.name : "Lokasi belum aktif"}>
             {nearestShop && userLocation ? (
               <div className="space-y-2 text-sm text-slate-600">
                 <p>{nearestShop.neighborhood}, {nearestShop.city}</p>
@@ -304,19 +288,19 @@ export function HomePageClient() {
                 {nearestShop.coordinates ? <p>{formatDistanceKm(calculateDistanceKm(userLocation, nearestShop.coordinates))} dari titikmu</p> : null}
                 <div className="flex flex-wrap gap-3">
                   <Link href={`/cafes/${nearestShop.slug}`} className="inline-flex rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">
-                    Open nearest cafe
+                    Lihat cafe
                   </Link>
                   <a href={nearestShop.mapsUrl} target="_blank" rel="noreferrer" className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm">
-                    Open route
+                    Buka rute
                   </a>
                 </div>
               </div>
             ) : (
-              <p className="text-sm leading-6 text-slate-500">Aktifkan lokasi untuk melihat cafe paling dekat dari titikmu sekarang.</p>
+              <p className="text-sm leading-6 text-slate-500">Aktifkan lokasi untuk melihat pilihan yang paling dekat dari titikmu sekarang.</p>
             )}
           </SidebarCard>
 
-          <SidebarCard eyebrow="Your favorites" title={favoriteShops.length > 0 ? `${favoriteShops.length} cafe${favoriteShops.length > 1 ? "s" : ""} saved` : "Nothing saved yet"}>
+          <SidebarCard eyebrow="Tersimpan" title={favoriteShops.length > 0 ? `${favoriteShops.length} cafe kamu tandai` : "Belum ada yang disimpan"}>
             {favoriteShops.length > 0 ? (
               <div className="space-y-3">
                 {favoriteShops.slice(0, 4).map((shop) => (
@@ -327,7 +311,7 @@ export function HomePageClient() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm leading-6 text-slate-500">Use Save pada card cafe untuk menyimpan shortlist personal di browser ini.</p>
+              <p className="text-sm leading-6 text-slate-500">Gunakan tombol Save di card cafe untuk membuat shortlist personal.</p>
             )}
           </SidebarCard>
         </aside>

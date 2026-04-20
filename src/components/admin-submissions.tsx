@@ -39,7 +39,7 @@ export function AdminSubmissions() {
 
   async function loadSubmissions() {
     if (!hasSupabaseEnv()) {
-      setError("Supabase env belum dipasang di app.");
+      setError("Koneksi katalog belum siap. Coba lagi beberapa saat lagi.");
       setLoading(false);
       return;
     }
@@ -107,7 +107,7 @@ export function AdminSubmissions() {
           neighborhood: submission.neighborhood ?? submission.city,
           address: submission.address,
           description: submission.description,
-          long_description: `${submission.description} Cafe ini berasal dari submission user dan sudah di-approve admin melalui Supabase.`,
+          long_description: `${submission.description} Tempat ini masuk ke katalog setelah melewati review internal KOPILIH.`,
           price_range: submission.priceRange,
           rating: 4.4,
           review_count: 0,
@@ -138,13 +138,13 @@ export function AdminSubmissions() {
       <section className="rounded-[36px] border border-white/70 bg-white/80 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Admin queue</p>
-            <h1 className="mt-3 text-5xl font-semibold leading-none text-slate-950">Review community submissions.</h1>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-500">Halaman ini sekarang membaca queue dari Supabase. Approve akan ikut publish ke tabel cafes.</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">KOPILIH review desk</p>
+            <h1 className="mt-3 text-5xl font-semibold leading-none text-slate-950">Tinjau rekomendasi cafe yang masuk.</h1>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-500">Gunakan halaman ini untuk menjaga kualitas katalog, melengkapi catatan internal, lalu menerbitkan listing yang layak tayang.</p>
           </div>
 
           <Link href="/submit" className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300">
-            Open submit page
+Buka form submit
           </Link>
         </div>
 
@@ -156,7 +156,7 @@ export function AdminSubmissions() {
       </section>
 
       {error ? <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
-      {loading ? <div className="mt-6 rounded-2xl bg-white px-4 py-5 text-sm text-slate-500">Loading submissions...</div> : null}
+      {loading ? <div className="mt-6 rounded-2xl bg-white px-4 py-5 text-sm text-slate-500">Memuat rekomendasi masuk...</div> : null}
 
       <section className="mt-8 space-y-5">
         {ordered.map((submission) => {
@@ -175,7 +175,7 @@ export function AdminSubmissions() {
 
                 {submission.status === "approved" ? (
                   <Link href={`/cafes/${submission.slug}`} className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                    Open public page
+Lihat halaman publik
                   </Link>
                 ) : null}
               </div>
@@ -198,22 +198,22 @@ export function AdminSubmissions() {
                   </div>
 
                   <label className="block">
-                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Admin note</span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Catatan internal</span>
                     <textarea value={note} onChange={(event) => setNotes((current) => ({ ...current, [submission.id]: event.target.value }))} rows={3} className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-400" />
                   </label>
                 </div>
 
                 <div className="rounded-[28px] bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Actions</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tindakan</p>
                   <div className="mt-4 grid gap-3">
                     <button type="button" onClick={() => reviewSubmission(submission, "approved", note.trim() || undefined)} className="rounded-full bg-emerald-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-300">
-                      Approve and publish
+Setujui dan terbitkan
                     </button>
                     <button type="button" onClick={() => reviewSubmission(submission, "rejected", note.trim() || undefined)} className="rounded-full bg-rose-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-300">
-                      Reject submission
+Tolak rekomendasi
                     </button>
                     <button type="button" onClick={() => reviewSubmission(submission, "pending", note.trim() || undefined)} className="rounded-full border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                      Move back to pending
+Kembalikan ke review
                     </button>
                   </div>
                 </div>

@@ -20,7 +20,7 @@ export function mapCafeRowToCoffeeShop(row: SupabaseCafeRow): CoffeeShop {
     description: row.description,
     longDescription:
       row.long_description ||
-      `${row.description} Listing ini diambil dari database Supabase untuk workflow production-ready Kopilih.`,
+      `${row.description} Tempat ini masuk ke katalog KOPILIH karena punya karakter ruang yang kuat dan layak direkomendasikan.`,
     priceRange: row.price_range,
     rating: Number(row.rating ?? 4.5),
     reviewCount: Number(row.review_count ?? 0),

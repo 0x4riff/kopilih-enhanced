@@ -92,7 +92,7 @@ export function SubmitForm() {
     }
 
     if (!hasSupabaseEnv()) {
-      setError("Supabase env belum dipasang. Isi NEXT_PUBLIC_SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_ANON_KEY dulu.");
+      setError("Layanan pengiriman sedang belum siap. Coba lagi beberapa saat lagi.");
       return;
     }
 
@@ -156,9 +156,9 @@ export function SubmitForm() {
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section className="rounded-[34px] border border-white/70 bg-white/80 p-6 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">User submission</p>
-          <h1 className="mt-3 text-5xl font-semibold leading-none text-slate-950">Propose a new cafe for the public listing.</h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-500">Sekarang form ini diarahkan ke Supabase. Submission akan masuk ke queue pending untuk direview admin.</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">KOPILIH submissions</p>
+          <h1 className="mt-3 text-5xl font-semibold leading-none text-slate-950">Ajukan cafe baru untuk masuk ke katalog KOPILIH.</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-500">Kirim detail tempat yang layak direkomendasikan. Tim kurasi akan meninjau sebelum listing tampil untuk publik.</p>
 
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="grid gap-4 md:grid-cols-2">
@@ -201,27 +201,27 @@ export function SubmitForm() {
 
             <div className="flex flex-wrap items-center gap-3">
               <button type="submit" disabled={sending} className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-60">
-                {sending ? "Submitting..." : "Submit to queue"}
+                {sending ? "Mengirim..." : "Kirim rekomendasi"}
               </button>
               <Link href="/admin/submissions" className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-300">
-                Open admin queue
+Buka meja review
               </Link>
             </div>
           </form>
         </section>
 
         <aside className="space-y-5">
-          <InfoCard eyebrow="Flow" title="What happens next?" body="Submission akan masuk ke Supabase sebagai pending entry. Admin nantinya review dan publish ke tabel cafes." />
-          <InfoCard eyebrow="Backend" title="Now database-backed" body="Kita sudah pindah dari local-only demo ke jalur database Supabase untuk submission queue." />
+          <InfoCard eyebrow="Proses" title="Apa yang terjadi setelah dikirim?" body="Setelah masuk, detail cafe akan ditinjau dulu untuk memastikan informasi dan kualitas listing tetap rapi." />
+          <InfoCard eyebrow="Standar" title="Apa yang membuat listing layak tayang?" body="Alamat jelas, deskripsi jujur, vibe relevan, dan tautan pendukung akan membantu cafe lebih cepat lolos review." />
 
           {submitted ? (
             <section className="rounded-[30px] border border-emerald-100 bg-emerald-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Submission created</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Rekomendasi diterima</p>
               <h2 className="mt-2 text-3xl font-semibold leading-none text-slate-950">{submitted.name}</h2>
-              <p className="mt-4 text-sm leading-6 text-slate-600">Status: {formatStatusLabel(submitted.status)}. Use the admin page to approve or reject it.</p>
+              <p className="mt-4 text-sm leading-6 text-slate-600">Status saat ini: {formatStatusLabel(submitted.status)}. Selanjutnya listing akan masuk tahap review sebelum tayang.</p>
               <div className="mt-5 flex gap-3">
-                <Link href="/admin/submissions" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">Review in admin</Link>
-                <Link href="/" className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm">Back home</Link>
+                <Link href="/admin/submissions" className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm">Lihat meja review</Link>
+                <Link href="/" className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm">Kembali ke beranda</Link>
               </div>
             </section>
           ) : null}

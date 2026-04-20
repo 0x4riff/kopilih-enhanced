@@ -74,13 +74,13 @@ export function CafeDetailClient({ slug }: { slug: string }) {
       <div className="mx-auto max-w-4xl px-4 py-14 text-center sm:px-6 lg:px-8">
         <div className="rounded-[36px] border border-dashed border-slate-300 bg-white/70 p-10 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)]">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Listing unavailable</p>
-          <h1 className="mt-3 font-display text-5xl text-slate-950">Cafe not found.</h1>
+          <h1 className="mt-3 font-display text-5xl text-slate-950">Cafe belum tersedia.</h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-500">
-            This cafe may not be published yet, or was removed from the listing.
+            Listing ini mungkin belum tayang, dipindahkan, atau sedang tidak tersedia untuk publik.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm">Back to listing</Link>
-            <Link href="/submit" className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm">Submit another cafe</Link>
+            <Link href="/" className="rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white shadow-sm">Kembali ke katalog</Link>
+            <Link href="/submit" className="rounded-full border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-sm">Rekomendasikan cafe</Link>
           </div>
         </div>
       </div>
@@ -100,7 +100,7 @@ export function CafeDetailClient({ slug }: { slug: string }) {
         <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
           <div className="space-y-6">
             <Link href="/" className="inline-flex rounded-full border border-white/30 bg-white/12 px-4 py-2 text-sm font-semibold text-white shadow-sm backdrop-blur transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/60">
-              Back to discover
+Kembali ke eksplorasi
             </Link>
 
             <div className="space-y-4">
@@ -108,7 +108,7 @@ export function CafeDetailClient({ slug }: { slug: string }) {
                 <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">{shop.city}</span>
                 <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">{shop.neighborhood}</span>
                 {shop.source === "community" ? (
-                  <span className="rounded-full bg-teal-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">Community approved</span>
+                  <span className="rounded-full bg-teal-500/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-white">Pilihan komunitas</span>
                 ) : null}
               </div>
               <div>
@@ -129,12 +129,12 @@ export function CafeDetailClient({ slug }: { slug: string }) {
           </div>
 
           <div className="rounded-[30px] border border-white/15 bg-slate-950/28 p-5 backdrop-blur-md">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/65">Snapshot</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/65">Ringkasan</p>
             <dl className="mt-5 space-y-4 text-sm text-white/85">
               <DetailRow label="Rating" value={`${shop.rating.toFixed(1)} / 5`} />
-              <DetailRow label="Reviews" value={`${shop.reviewCount} public reviews`} />
+              <DetailRow label="Reviews" value={`${shop.reviewCount} ulasan publik`} />
               <DetailRow label="Price" value={formatPriceLabel(shop.priceRange)} />
-              <DetailRow label="WiFi" value={shop.wifiFriendly ? "Remote-work ready" : "Casual browsing"} />
+              <DetailRow label="WiFi" value={shop.wifiFriendly ? "Siap untuk kerja fokus" : "Nyaman untuk singgah santai"} />
               <DetailRow label="Address" value={shop.address} />
             </dl>
           </div>
@@ -173,8 +173,8 @@ export function CafeDetailClient({ slug }: { slug: string }) {
 
         <aside className="space-y-5">
           <section className="rounded-[32px] border border-white/70 bg-white/85 p-5 shadow-[0_25px_70px_-45px_rgba(15,23,42,0.4)] backdrop-blur">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nearby mood</p>
-            <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">More from {shop.city}</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Sekitar kota ini</p>
+            <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">Pilihan lain di {shop.city}</h2>
             <div className="mt-4 space-y-3">
               {related.length > 0 ? (
                 related.map((candidate) => (
@@ -184,16 +184,16 @@ export function CafeDetailClient({ slug }: { slug: string }) {
                   </Link>
                 ))
               ) : (
-                <p className="text-sm leading-6 text-slate-500">This is the only listed cafe from {shop.city} right now.</p>
+                <p className="text-sm leading-6 text-slate-500">Saat ini baru listing ini yang tayang untuk area {shop.city}.</p>
               )}
             </div>
           </section>
 
           {shop.source === "community" ? (
             <section className="rounded-[32px] border border-teal-200 bg-teal-50 p-5 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">Approval note</p>
-              <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">Community-approved listing</h2>
-              <p className="mt-4 text-sm leading-6 text-slate-700">This cafe entered the catalog through the submit flow and was approved by an admin.</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">Catatan kurasi</p>
+              <h2 className="mt-2 font-display text-3xl leading-none text-slate-950">Masuk lewat rekomendasi komunitas</h2>
+              <p className="mt-4 text-sm leading-6 text-slate-700">Cafe ini direkomendasikan pengguna lalu dipilih masuk ke katalog setelah proses review.</p>
             </section>
           ) : null}
         </aside>

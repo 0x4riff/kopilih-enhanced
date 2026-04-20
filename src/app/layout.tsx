@@ -5,10 +5,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "KOPILIH",
   description: "Temukan cafe Indonesia yang terasa tepat untuk kerja, meeting santai, dan kembali lagi.",
-  keywords: ["coffee shop", "Indonesia", "cafe finder", "location based cafe", "Supabase"],
+  keywords: ["coffee shop", "Indonesia", "cafe finder", "location based cafe", "kopilih"],
   openGraph: {
     title: "KOPILIH",
-    description: "Temukan cafe Indonesia yang terasa tepat, dengan kurasi, lokasi, dan community flow.",
+    description: "Temukan cafe Indonesia yang terasa tepat, dari pilihan kerja fokus sampai singgah santai.",
     type: "website",
   },
 };

@@ -23,12 +23,12 @@ export function ShopCard({ shop, userLocation }: { shop: CoffeeShop; userLocatio
           </span>
           {shop.source === "community" ? (
             <span className="rounded-full bg-teal-500/85 px-3 py-1 text-xs font-semibold text-white">
-              Community approved
+Pilihan komunitas
             </span>
           ) : null}
           {distance !== null ? (
             <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900">
-              {formatDistanceKm(distance)} away
+{formatDistanceKm(distance)} dari kamu
             </span>
           ) : null}
         </div>
@@ -50,7 +50,7 @@ export function ShopCard({ shop, userLocation }: { shop: CoffeeShop; userLocatio
           <p className="text-sm leading-6 text-slate-600">{shop.description}</p>
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-right text-sm text-amber-900 shadow-sm">
             <div className="font-semibold">{shop.rating.toFixed(1)}</div>
-            <div>{shop.reviewCount} reviews</div>
+            <div>{shop.reviewCount} ulasan</div>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ export function ShopCard({ shop, userLocation }: { shop: CoffeeShop; userLocatio
           </span>
           {distance !== null && distance < 5 ? (
             <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-              Near you
+Dekat darimu
             </span>
           ) : null}
         </div>
@@ -81,7 +81,7 @@ export function ShopCard({ shop, userLocation }: { shop: CoffeeShop; userLocatio
             href={`/cafes/${shop.slug}`}
             className="rounded-full bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
           >
-            View detail
+Lihat detail
           </Link>
         </div>
       </div>
